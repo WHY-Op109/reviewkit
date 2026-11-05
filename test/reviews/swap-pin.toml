@@ -1,0 +1,7 @@
+format = "reviewkit-statement-pin/0"
+# Fault fixture RKToy.Bad.Swap: the pin of mainA, computed from mainA itself.
+
+[[pin]]
+decl = "RKToy.Bad.Swap.mainA"
+statement = "sha256:8725850068404aedaa5ba5c7c6998dd1bccc1adc9187e852a51e7c9ebc9c4843"
+digest = "sha256:3b29c52e53c8e14a9523331c42867dc02cc4eeae7a51df902b015ae110aea19e"

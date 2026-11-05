@@ -1,0 +1,13 @@
+format = "reviewkit-sorry-budget/0"
+# ReviewKit toy tests: the sorry budget (human-owned in a real project).
+
+[[entry]]
+decl = "RKToy.Abstract.exists_bound"
+statement = "sha256:f1504f2f7c2f2ed86098229016fb29daaa3f0e8d220b601ded404bd02a9f975d"
+digest = "sha256:1ee38edd82880af57fe073ce785a2bc3d5bd56544538aa244ccef9e23813ec2c"
+
+[[entry]]
+decl = "RKToy.Abstract.main"
+statement = "sha256:1f4500ffde1f9b5afc65b9b3729dc89d44b0d7a7c85bdddf687bae62783e8bf6"
+digest = "sha256:ed457f5355b40c5a85d384ee599c382e88d24abd917c2e20f91e9ceb16ed0bf1"
+

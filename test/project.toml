@@ -1,0 +1,52 @@
+# ReviewKit's own test configuration: the toy library in test/ (core Lean only).
+#   cd reviewkit && lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
+format = "reviewkit-config/0"
+
+[project]
+import = ["RKToy"]
+modules = ["RKToy"]
+abstract = "RKToy.Abstract"
+
+[closure]
+background = ["Init", "Std", "Lean", "ReviewKit"]
+[[closure.class]]
+tag = "abstract"
+modules = ["RKToy.Abstract"]
+[[closure.class]]
+tag = "foundations"
+modules = ["RKToy.Foundations"]
+[[closure.class]]
+tag = "upstream"
+modules = ["RKUp"]
+
+[axioms]
+allowed = ["propext", "Classical.choice", "Quot.sound"]
+budget = "test/reviews/sorry-budget.toml"
+
+[[imports.rule]]
+module = "RKToy.Abstract"
+allow = ["Init", "RKUp", "RKToy.Foundations"]
+[[imports.rule]]
+module = "RKToy.Foundations"
+allow = ["Init", "Lean", "ReviewKit", "RKUp"]
+[[imports.rule]]
+module = "RKToy"
+allow = ["Init", "RKToy"]
+
+[foundations_names]
+foundations = ["RKToy.Foundations"]
+checked = ["RKUp"]
+required = ["RKUp.Thing"]
+basic = []
+
+[fingerprint]
+content = ["RKToy", "RKUp"]
+unfold_abbrevs = ["RKToy.Foundations"]
+notations = ["GT.gt", "GE.ge"]
+
+[pin]
+file = "test/reviews/statement-pin.toml"
+decls = ["RKToy.Abstract.main", "RKToy.Abstract.Curve"]
+
+[placeholders]
+modules = ["RKToy"]

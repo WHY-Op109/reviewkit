@@ -1,0 +1,25 @@
+name = "ReviewKit"
+version = "0.1.0"
+defaultTargets = ["ReviewKit", "review"]
+
+# The placeholder attribute and the checks (K1, K2).
+[[lean_lib]]
+name = "ReviewKit"
+
+# `lake exe review`: reads a project's .olean files, so it is always built by
+# the project's own toolchain; it runs project initialisers (supportInterpreter).
+[[lean_exe]]
+name = "review"
+root = "ReviewKit.Main"
+supportInterpreter = true
+
+# The kit's own toy library with planted faults (tests only; core Lean only).
+[[lean_lib]]
+name = "RKToy"
+srcDir = "test"
+roots = ["RKToy", "RKUp"]
+
+[[lean_lib]]
+name = "RKToyBad"
+srcDir = "test"
+globs = ["RKToy.Bad.+"]

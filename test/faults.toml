@@ -1,0 +1,254 @@
+# ReviewKit's own fault tests (D27 test 1, D43/F21). Every fault names the diagnostic it must
+# produce; any other error in a fault case also fails it, so a crash, a missing import or an
+# unrelated breakage cannot pass for a caught fault. Controls must produce no errors.
+#   cd reviewkit && lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
+format = "reviewkit-faults/0"
+
+# --- controls -------------------------------------------------------------------------------
+
+[[case]]
+name = "clean toy passes every check"
+kind = "control"
+command = "all"
+[[case.key]]
+decl = "RKUp.Thing"            # the walk enters the reviewed provider (D40 Finding 2)
+tag = "upstream"
+[[case.key]]
+decl = "RKToy.Foundations.Cat"
+tag = "foundations"
+[[case.key]]
+decl = "RKToy.Abstract.Curve"
+tag = "abstract"
+
+[[case]]
+name = "impact list follows proofs"
+kind = "control"
+command = "impact"
+args = ["RKToy.Abstract.IsGood"]
+[[case.impact]]
+decl = "RKToy.Abstract.IsGood"
+includes = ["RKToy.Abstract.main", "RKToy.Main.isGood_helper", "RKToy.Abstract.isGood_zero"]
+
+[[case]]
+name = "pin: an exact copy of the pinned statement passes (control for the swap fault)"
+kind = "control"
+modules = ["RKToy.Bad.Swap"]
+command = "pin"
+pin = "test/reviews/swap-pin.toml"
+pin_decls = ["RKToy.Bad.Swap.mainA"]
+[[case.stand_in]]
+decl = "RKToy.Bad.Swap.mainCopy"
+for = "RKToy.Bad.Swap.mainA"
+
+# --- closure ---------------------------------------------------------------------------------
+
+[[case]]
+name = "closure: abstract definition uses implementation code"
+modules = ["RKToy.Bad.AbstractUsesImpl"]
+command = "closure"
+abstract = "RKToy.Bad.AbstractUsesImpl"
+[[case.expect]]
+code = "closure-outside-allowed"
+decl = "RKToy.Impl.helperBound"
+
+[[case]]
+name = "closure: leak through a Foundations structure's constructor"
+modules = ["RKToy.Bad.AbstractViaLeak"]
+command = "closure"
+abstract = "RKToy.Bad.AbstractViaLeak"
+[[case.class]]
+tag = "foundations"
+modules = ["RKToy.Bad.FoundationsLeak"]
+[[case.expect]]
+code = "closure-outside-allowed"
+decl = "RKToy.Impl.helperBound"
+
+# --- imports ---------------------------------------------------------------------------------
+
+[[case]]
+name = "imports: implementation imports the provider directly"
+modules = ["RKToy.Bad.ImplImportsUp"]
+command = "imports"
+[[case.expect]]
+code = "import-not-allowed"
+decl = "RKUp"
+
+[[case]]
+name = "imports: Foundations-name warning (warning only)"
+modules = ["RKToy.Bad.AbstractDirect"]
+command = "imports"
+abstract = "RKToy.Bad.AbstractDirect"
+[[case.expect]]
+code = "foundations-name"
+decl = "RKUp.UpObj"
+severity = "warning"
+[[case.expect]]
+code = "foundations-name-required"
+decl = "RKUp.Thing"
+severity = "warning"
+
+# --- axioms ----------------------------------------------------------------------------------
+
+[[case]]
+name = "axioms: project axiom, its use, and a stray sorry"
+modules = ["RKToy.Bad.PropAxiom"]
+command = "axioms"
+[[case.expect]]
+code = "project-axiom"
+decl = "RKToy.Bad.PropAxiom.bad_prop"
+[[case.expect]]
+code = "nonstandard-axiom"
+decl = "RKToy.Bad.PropAxiom.uses_axiom"
+[[case.expect]]
+code = "sorry-not-in-budget"
+decl = "RKToy.Bad.PropAxiom.stray"
+
+[[case]]
+name = "axioms: budgeted theorem whose statement changed to False"
+modules = ["RKToy.Bad.BudgetChanged"]
+command = "axioms"
+[[case.stand_in]]
+decl = "RKToy.Bad.BudgetChanged.exists_bound"
+for = "RKToy.Abstract.exists_bound"
+[[case.expect]]
+code = "budget-statement-mismatch"
+decl = "RKToy.Bad.BudgetChanged.exists_bound"
+
+[[case]]
+name = "axioms: sorry inside a constructor, traced in every root order"
+modules = ["RKToy.Bad.Cycle"]
+command = "axioms"
+abstract = "RKToy.Bad.Cycle"
+orders = ["forward", "reverse"]
+[[case.expect]]
+code = "sorry-not-in-budget"
+[[case.trace]]
+decl = "RKToy.Bad.Cycle.useT"
+contains = ["sorryAx"]
+[[case.trace]]
+decl = "RKToy.Bad.Cycle.aUsesMk"
+contains = ["sorryAx"]
+[[case.trace]]
+decl = "RKToy.Bad.Cycle.T"
+contains = ["sorryAx"]
+
+# --- placeholders ----------------------------------------------------------------------------
+
+[[case]]
+name = "placeholders: untagged opaque"
+modules = ["RKToy.Bad.Untagged"]
+command = "placeholders"
+[[case.expect]]
+code = "placeholder-untagged"
+decl = "RKToy.Bad.Untagged.Hidden"
+
+[[case]]
+name = "placeholders: @[placeholder] on a theorem"
+modules = ["RKToy.Bad.TheoremPlaceholder"]
+command = "placeholders"
+[[case.expect]]
+code = "placeholder-not-data"
+decl = "RKToy.Bad.TheoremPlaceholder.fake"
+
+# --- statement pin and fingerprints ------------------------------------------------------------
+
+[[case]]
+name = "pin: an opaque object swapped for another of the same type (D43/F03)"
+modules = ["RKToy.Bad.Swap"]
+command = "pin"
+pin = "test/reviews/swap-pin.toml"
+pin_decls = ["RKToy.Bad.Swap.mainA"]
+[[case.stand_in]]
+decl = "RKToy.Bad.Swap.mainB"
+for = "RKToy.Bad.Swap.mainA"
+[[case.expect]]
+code = "pin-statement-mismatch"
+decl = "RKToy.Bad.Swap.mainB"
+
+[[case]]
+name = "pin: transitive digest changed (stale, warning only; D43/F10)"
+command = "pin"
+pin = "test/reviews/stale-pin.toml"
+[[case.expect]]
+code = "pin-digest-stale"
+decl = "RKToy.Abstract.main"
+severity = "warning"
+
+[[case]]
+name = "fingerprint variants (V7, D43/F03, D40 Finding 2)"
+kind = "fpcompare"
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V1.P"
+level = "statement"
+same = true                       # bound variables renamed
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V2.P"
+level = "digest"
+same = true                       # doc comment and layout
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V3.P"
+level = "statement"
+same = false                      # quantifiers swapped
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V4.P"
+level = "statement"
+same = false                      # hypothesis dropped
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V5.P"
+level = "statement"
+same = false                      # ≤ became <
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V6.P"
+level = "digest"
+same = false                      # referenced constant renamed: identity kept, re-review
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V7.P"
+level = "digest"
+same = false                      # referenced constant's body changed
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V8.P"
+level = "statement"
+same = true                       # 0 < x written x > 0
+[[case.compare]]
+a = "RKToy.Fp.V0.P"
+b = "RKToy.Fp.V9.P"
+level = "statement"
+same = false                      # explicit binder made implicit
+[[case.compare]]
+a = "RKToy.Fp.U0.R"
+b = "RKToy.Fp.U1.R"
+level = "digest"
+same = true                       # universe parameter renamed
+[[case.compare]]
+a = "RKToy.Fp.F0.S"
+b = "RKToy.Fp.F1.S"
+level = "digest"
+same = true                       # through a Foundations abbrev or the provider directly
+[[case.compare]]
+a = "RKToy.Fp.F0.S"
+b = "RKToy.Fp.F1.S"
+level = "statement"
+same = false                      # ... but the statement names a different constant
+[[case.compare]]
+a = "RKToy.Fp.SwapAA"
+b = "RKToy.Fp.SwapAB"
+level = "statement"
+same = false                      # D43/F03: distinct opaque objects of the same type
+[[case.compare]]
+a = "RKToy.Fp.SwapAA"
+b = "RKToy.Fp.SwapAB"
+level = "digest"
+same = false
+[[case.compare]]
+a = "RKUp.V1.f"
+b = "RKUp.V2.f"
+level = "digest"
+same = false                      # provider body changed, same type (D40 Finding 2)
