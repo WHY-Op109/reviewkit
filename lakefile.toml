@@ -1,5 +1,7 @@
 name = "ReviewKit"
-version = "0.1.0"
+version = "0.2.0"
+# Not indexed by Reservoir (public but unannounced).
+reservoir = false
 defaultTargets = ["ReviewKit", "review"]
 
 # The placeholder attribute and the checks (K1, K2).
