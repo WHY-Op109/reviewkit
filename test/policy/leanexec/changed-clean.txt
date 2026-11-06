@@ -1,3 +1,0 @@
-Toy/Clean.lean
-README.md
-Toy/Gone.lean

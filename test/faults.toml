@@ -1,7 +1,7 @@
-# ReviewKit's own fault tests (D27 test 1, D43/F21). Every fault names the diagnostic it must
+# ReviewKit's own fault tests. Every fault names the diagnostic it must
 # produce; any other error in a fault case also fails it, so a crash, a missing import or an
 # unrelated breakage cannot pass for a caught fault. Controls must produce no errors.
-#   cd reviewkit && lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
+#   lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
 format = "reviewkit-faults/0"
 
 # --- controls -------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ name = "clean toy passes every check"
 kind = "control"
 command = "all"
 [[case.key]]
-decl = "RKUp.Thing"            # the walk enters the reviewed provider (D40 Finding 2)
+decl = "RKUp.Thing"            # the walk enters the reviewed provider
 tag = "upstream"
 [[case.key]]
 decl = "RKToy.Foundations.Cat"
@@ -153,7 +153,7 @@ decl = "RKToy.Bad.TheoremPlaceholder.fake"
 # --- statement pin and fingerprints ------------------------------------------------------------
 
 [[case]]
-name = "pin: an opaque object swapped for another of the same type (D43/F03)"
+name = "pin: an opaque object swapped for another of the same type "
 modules = ["RKToy.Bad.Swap"]
 command = "pin"
 pin = "test/reviews/swap-pin.toml"
@@ -166,7 +166,7 @@ code = "pin-statement-mismatch"
 decl = "RKToy.Bad.Swap.mainB"
 
 [[case]]
-name = "pin: transitive digest changed (stale, warning only; D43/F10)"
+name = "pin: transitive digest changed (stale, warning only)"
 command = "pin"
 pin = "test/reviews/stale-pin.toml"
 [[case.expect]]
@@ -175,7 +175,7 @@ decl = "RKToy.Abstract.main"
 severity = "warning"
 
 [[case]]
-name = "fingerprint variants (V7, D43/F03, D40 Finding 2)"
+name = "fingerprint variants"
 kind = "fpcompare"
 [[case.compare]]
 a = "RKToy.Fp.V0.P"
@@ -241,7 +241,7 @@ same = false                      # ... but the statement names a different cons
 a = "RKToy.Fp.SwapAA"
 b = "RKToy.Fp.SwapAB"
 level = "statement"
-same = false                      # D43/F03: distinct opaque objects of the same type
+same = false                      # distinct opaque objects of the same type
 [[case.compare]]
 a = "RKToy.Fp.SwapAA"
 b = "RKToy.Fp.SwapAB"
@@ -251,9 +251,9 @@ same = false
 a = "RKUp.V1.f"
 b = "RKUp.V2.f"
 level = "digest"
-same = false                      # provider body changed, same type (D40 Finding 2)
+same = false                      # provider body changed, same type
 
-# --- opaque bodies (D44, Codex's review of A1) ------------------------------------------------
+# --- opaque bodies ----------------------------------------------------------------------------
 
 [[case]]
 name = "axioms: an admission hidden in an opaque body is a sorry source"
@@ -283,9 +283,8 @@ code = "placeholder-sorry-witness"
 decl = "RKToy.Bad.OpaqueSorry.hidden"
 severity = "warning"
 
-# --- evidence records and attestations (D9, D43/F11; data format v0) --------------------------
-# The clean control above runs `all`, which includes `evidence` (the budget's and pin's links)
-# and `attestations` (test/reviews/attestations.toml, computed as current).
+# --- evidence records -------------------------------------------------------------------------
+# The clean control above runs `all`, which includes `evidence` (the budget's and pin's links).
 
 [[case]]
 name = "evidence: a record whose digest text was edited"
@@ -332,64 +331,3 @@ decl = "RKToy.Abstract.exists_bound"
 [[case.expect]]
 code = "pin-evidence-missing"
 decl = "RKToy.Abstract.Curve"
-
-[[case]]
-name = "evidence: a pin entry names an attestation that does not exist"
-command = "evidence"
-pin = "test/faults-evidence/pin-attestation-unknown.toml"
-[[case.expect]]
-code = "pin-attestation-unknown"
-decl = "RKToy.Abstract.main"
-
-[[case]]
-name = "attestations: statement changed since the attestation (stale, warning)"
-command = "attestations"
-evidence = "test/faults-evidence/with-old"
-attestations = "test/faults-evidence/attest-stale.toml"
-[[case.expect]]
-code = "attestation-stale-statement"
-decl = "RKToy.Abstract.main"
-severity = "warning"
-
-[[case]]
-name = "attestations: a definition used changed since the attestation (stale digest, warning)"
-command = "attestations"
-evidence = "test/faults-evidence/with-old"
-attestations = "test/faults-evidence/attest-stale-digest.toml"
-[[case.expect]]
-code = "attestation-stale-digest"
-decl = "RKToy.Abstract.main"
-severity = "warning"
-
-[[case]]
-name = "attestations: a binding names evidence that does not exist"
-command = "attestations"
-evidence = "test/faults-evidence/with-old"
-attestations = "test/faults-evidence/attest-missing.toml"
-[[case.expect]]
-code = "attestation-evidence-missing"
-decl = "RKToy.Abstract.main"
-
-[[case]]
-name = "attestations: a binding disagrees with the evidence it names"
-command = "attestations"
-evidence = "test/faults-evidence/with-old"
-attestations = "test/faults-evidence/attest-mismatch.toml"
-[[case.expect]]
-code = "attestation-evidence-mismatch"
-decl = "RKToy.Abstract.main"
-
-[[case]]
-name = "attestations: one id used twice"
-command = "attestations"
-evidence = "test/faults-evidence/with-old"
-attestations = "test/faults-evidence/attest-dup.toml"
-[[case.expect]]
-code = "attestation-duplicate-id"
-
-[[case]]
-name = "attestations: an unknown kind is a format error"
-command = "attestations"
-attestations = "test/faults-evidence/attest-bad-kind.toml"
-[[case.expect]]
-code = "attestation-format"

@@ -1,7 +1,0 @@
-# toy CODEOWNERS: `/kit/*` covers kit's own files only (GitHub: a single * does not descend),
-# so kit/sub/deep.py has no owner
-/.github/      @toy-owner
-/POLICY.md     @toy-owner
-/kit/*         @toy-owner
-/build.toml    @toy-owner
-/vendor/sub    @toy-owner

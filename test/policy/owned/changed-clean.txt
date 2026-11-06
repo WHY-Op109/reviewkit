@@ -1,3 +1,0 @@
-src/main.txt
-vendor/subway.txt
-kit-notes/x.md

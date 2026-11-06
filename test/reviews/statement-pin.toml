@@ -6,7 +6,6 @@ decl = "RKToy.Abstract.main"
 statement = "sha256:1f4500ffde1f9b5afc65b9b3729dc89d44b0d7a7c85bdddf687bae62783e8bf6"
 digest = "sha256:ed457f5355b40c5a85d384ee599c382e88d24abd917c2e20f91e9ceb16ed0bf1"
 evidence = "fingerprint:RKToy.Abstract.main@1f4500ffde1f.ed457f5355b4"
-attestation = "toy-main-check"
 
 [[pin]]
 decl = "RKToy.Abstract.Curve"

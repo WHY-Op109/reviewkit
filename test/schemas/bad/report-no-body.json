@@ -1,6 +1,0 @@
-{
-  "format": "reviewkit-report/0",
-  "command": "extras",
-  "config": "test/project.toml",
-  "ok": true
-}

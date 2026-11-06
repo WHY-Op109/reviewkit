@@ -1,4 +1,4 @@
-/- ReviewKit toy CONTROL for `OpaqueSorry` (D43/F21): the same shape with an honest witness. -/
+/- ReviewKit toy CONTROL for `OpaqueSorry`: the same shape with an honest witness. -/
 import RKToy.Abstract
 noncomputable section
 namespace RKToy.Bad.OpaqueWitness

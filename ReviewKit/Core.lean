@@ -129,12 +129,10 @@ def usedConsts (e : Expr) : Array Name := Id.run do
   return s.toArray
 
 /-- Dependencies of a declaration. Statement level (`proofs = false`): its type, the value of a
-definition, and the constructors of an inductive type (so a structure's field types are seen,
-L3 report §1). With proofs: theorem proofs and **opaque values** too. An opaque value carries no
+definition, and the constructors of an inductive type (so a structure's field types are seen). With proofs: theorem proofs and **opaque values** too. An opaque value carries no
 meaning (the kernel never unfolds it), so the statement-level walk and the fingerprints skip it;
 but it can hide an admission (`opaque x : Nat := sorry` depends on `sorryAx`, as `#print axioms`
-shows), so the axiom audit's trace, which uses `proofs = true`, follows it (D44, Codex's A1
-review). -/
+shows), so the axiom audit's trace, which uses `proofs = true`, follows it. -/
 def depsOf (info : ConstantInfo) (proofs : Bool) : Array Name :=
   let t := usedConsts info.type
   let v := match info with
@@ -151,7 +149,7 @@ def depsOf (info : ConstantInfo) (proofs : Bool) : Array Name :=
 /-- The members of a declaration's inductive block: all types of a (mutual) inductive
 declaration and their constructors. Cycles in `depsOf` occur only inside such blocks
 (inductive ↔ constructor), so treating a block as one node gives an order-independent fixed
-point (D43/F21). Other declarations form singleton blocks. -/
+point. Other declarations form singleton blocks. -/
 def blockOf (env : Environment) (n : Name) : Array Name :=
   let indAll : Option (List Name) := match env.find? n with
     | some (.inductInfo v) => some v.all
@@ -193,7 +191,7 @@ partial def ownerOf (env : Environment) (n : Name) : Name :=
   else n
 
 /-- Whether a declaration uses `sorryAx` itself: in its type, a definition's or theorem's value,
-or an opaque's value (an admission hidden in an opaque body is a sorry source, D44). -/
+or an opaque's value (an admission hidden in an opaque body is a sorry source). -/
 def directSorry (info : ConstantInfo) : Bool :=
   (usedConsts info.type).contains ``sorryAx ||
     (match info with

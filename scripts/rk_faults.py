@@ -1,4 +1,4 @@
-"""rk_faults.py: run reviewkit-policy-faults/0 fixtures against the Python policy checks.
+"""rk_faults.py: run reviewkit-policy-faults/0 fixtures against the Python checks.
 
     python3 -I rk_faults.py FILE.toml
 
@@ -24,9 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import rk_common as rk  # noqa: E402
 
 FORMAT = "reviewkit-policy-faults/0"
-SCRIPTS = {"extras": "rk_extras.py", "owned-paths": "rk_owned.py", "flagged": "rk_flagged.py",
-           "pin-policy": "rk_pinpolicy.py", "snapshot": "rk_snapshot.py",
-           "schema": "rk_schema.py", "lean-exec": "rk_leanexec.py"}
+SCRIPTS = {"extras": "rk_extras.py"}
 CASE_KEYS = {"name", "kind", "command", "dir", "args", "expect", "stdin"}
 EXPECT_KEYS = {"code", "decl", "file", "severity"}
 HERE = os.path.dirname(os.path.abspath(__file__))

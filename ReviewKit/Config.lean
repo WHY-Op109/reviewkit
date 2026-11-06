@@ -1,5 +1,5 @@
 /-
-ReviewKit: the project configuration (K3, data format v0), read from a TOML file whose path the
+ReviewKit: the project configuration (data format v0), read from a TOML file whose path the
 caller passes (`--config`). The kit itself names no project: every module prefix, tag, rule and
 file path comes from this file.
 -/
@@ -11,7 +11,7 @@ open Lean Lake Lake.Toml
 namespace ReviewKit
 
 /-- A closure class: constants in these modules are entered by the closure walk and listed with
-this tag (for example `abstract`, `foundations`, `staging`, `stacks`, `tauceti`). -/
+this tag (for example `abstract`, `foundations`, `upstream`). -/
 structure ClosureClass where
   tag : String
   modules : Array Name
@@ -38,7 +38,7 @@ structure Config where
   imports : Array Name := #[]
   /-- Module prefixes that are project code. -/
   project : Array Name := #[]
-  /-- The formal abstract module (D39). -/
+  /-- The formal abstract module. -/
   abstract : Name := .anonymous
   /-- Module prefixes not entered by the walk (trusted background: Lean core, Mathlib, ...). -/
   background : Array Name := #[]
@@ -48,9 +48,9 @@ structure Config where
   allowedAxioms : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   /-- The human-owned sorry budget (TOML), relative to the working directory. -/
   budgetFile : Option System.FilePath := none
-  /-- Import rules (D10). -/
+  /-- Import rules. -/
   importRules : Array ImportRule := #[]
-  /-- Foundations-name warning (Q14): module prefixes of the Foundations layer. -/
+  /-- Foundations-name warning: module prefixes of the Foundations layer. -/
   fnFoundations : Array Name := #[]
   /-- Library prefixes whose direct use by the abstract is checked (for example `Mathlib`). -/
   fnChecked : Array Name := #[]
@@ -58,7 +58,7 @@ structure Config where
   fnBasic : Array Name := #[]
   /-- Substantial objects (exact names) that must reach the abstract through a Foundations name. -/
   fnRequired : Array Name := #[]
-  /-- Module prefixes whose constants are fingerprinted by content (Merkle, D40 Finding 2). -/
+  /-- Module prefixes whose constants are fingerprinted by content (Merkle). -/
   fpContent : Array Name := #[]
   /-- Module prefixes whose `abbrev`s are unfolded in the transitive digest. -/
   fpUnfold : Array Name := #[]
@@ -70,10 +70,8 @@ structure Config where
   pinDecls : Array Name := #[]
   /-- Module prefixes whose placeholders must be tagged `@[placeholder]`. -/
   placeholderModules : Array Name := #[]
-  /-- Machine evidence records (`evidence.dir`, D43/F11), relative to the working directory. -/
+  /-- Machine evidence records (`evidence.dir`), relative to the working directory. -/
   evidenceDir : Option System.FilePath := none
-  /-- Human attestation records (`attestations.file`, D43/F11). -/
-  attestationsFile : Option System.FilePath := none
   /-- Fault fixtures only. -/
   standIns : Array StandIn := #[]
   /-- Fault fixtures only: compute per-declaration traces with the roots in reverse order. -/
@@ -152,15 +150,13 @@ def loadTomlFile (path : System.FilePath) : IO (Except String Table) := do
       return s!"{m.pos.line}:{m.pos.column}: {← m.data.toString}"
     return .error s!"{path}: {String.intercalate "; " msgs}"
 
-/-- Top-level tables that hold data read by other kit tools (papers manifest, scout, upstream
-pin, and the tables the Python checks in `scripts/` read); accepted here without validation:
-their JSON Schema (`schemas/reviewkit-config-0.schema.json`) checks them. -/
-def reservedTables : List String :=
-  ["papers", "scout", "upstream", "extras", "tracker", "owned", "flagged", "pin_policy"]
+/-- Top-level tables read by other tools (a papers manifest; `[extras]`, read by
+`scripts/rk_extras.py`); accepted here without validation. -/
+def reservedTables : List String := ["papers", "extras"]
 
 def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
   checkKeys t (["format", "project", "closure", "axioms", "imports", "foundations_names",
-    "fingerprint", "pin", "placeholders", "evidence", "attestations"] ++ reservedTables) "config"
+    "fingerprint", "pin", "placeholders", "evidence"] ++ reservedTables) "config"
   match ← getStr t `format "config" with
   | some "reviewkit-config/0" => pure ()
   | some f => cfgErr s!"config.format: unsupported format '{f}' (expected reviewkit-config/0)"
@@ -194,8 +190,6 @@ def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
   checkKeys ph ["modules"] "placeholders"
   let ev ← getTable t `evidence "config"
   checkKeys ev ["dir"] "evidence"
-  let att ← getTable t `attestations "config"
-  checkKeys att ["file"] "attestations"
   let allowed ← getNames a `allowed "axioms"
   let notations ← getNames fp `notations "fingerprint"
   return {
@@ -219,7 +213,6 @@ def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
     pinDecls := ← getNames pin `decls "pin"
     placeholderModules := ← getNames ph `modules "placeholders"
     evidenceDir := (← getStr ev `dir "evidence").map (·)
-    attestationsFile := (← getStr att `file "attestations").map (·)
   }
 
 def loadConfig (path : System.FilePath) : IO (Except String Config) := do

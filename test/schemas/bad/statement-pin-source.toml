@@ -1,7 +1,0 @@
-# ReviewKit schema test instance (data format v0); toy names only.
-format = "reviewkit-statement-pin/0"
-
-[[pin]]
-decl = "RKToy.Abstract.main"
-statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"
-source = "Toy Theorem 1"

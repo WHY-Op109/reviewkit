@@ -1,3 +1,0 @@
-M	lakefile.toml
-M	lake-manifest.json
-M	lean-toolchain

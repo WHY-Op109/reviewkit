@@ -1,4 +1,4 @@
-/- ReviewKit toy tests: a thin Foundations layer (D10). -/
+/- ReviewKit toy tests: a thin Foundations layer. -/
 import ReviewKit.Attr
 import RKUp
 noncomputable section

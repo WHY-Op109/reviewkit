@@ -1,23 +1,23 @@
 /-
-ReviewKit: fingerprints (K1 `fingerprint`, V7, D40 Finding 2, D43/F03, D43/F10).
+ReviewKit: fingerprints (`review fingerprint`, the statement pin, evidence).
 
 A canonical serialisation of the kernel terms: de Bruijn indices, no binder names (binder kinds
 kept), no metadata, universe parameters by position, a configurable list of notation constants
 unfolded. Hashed with SHA-256 (`ReviewKit.Sha256`).
 
 Two levels:
-* **statement** (the hard pin, D43/F10): a declaration's own statement — its type; for a
+* **statement** (the hard pin): a declaration's own statement — its type; for a
   definition also its value; for an inductive type its whole block (types and constructors) —
   with every other constant referenced **by its qualified name only**. A change to the
   statement, or to *which* objects it names, changes it; a change inside a referenced definition
   does not.
 * **digest** (transitive, Merkle): the same serialisation, but a constant from a content module
-  (the project and reviewed providers such as Tau Ceti, `fingerprint.content`) is referenced by
+  (the project and reviewed providers, `fingerprint.content`) is referenced by
   its qualified name **and** the digest of its own content — its body included, so a pin bump
-  that changes a Tau Ceti definition's meaning changes the digest (D40 Finding 2). Background
+  that changes a provider definition's meaning changes the digest. Background
   constants (Mathlib, core) are referenced by name plus a hash of their type.
 
-Declaration identity is kept (D43/F03): references always carry the qualified name, so two
+Declaration identity is kept: references always carry the qualified name, so two
 distinct opaque constants of the same type never hash alike. A declaration's *own* name is not
 part of its own hash (so an exact copy under another name has the same statement fingerprint);
 renames still trigger re-review, because reviews, budget entries and pins are keyed by name and
@@ -73,7 +73,7 @@ def isContentConst (ctx : FpCtx) (n : Name) : Bool :=
 
 /-- A constant unfolded before hashing: a notation constant (both levels) or, in the digest, an
 `abbrev` of an unfold module (Foundations re-exports, so "through Foundations" and "the provider
-directly" hash alike, L3 report §3). -/
+directly" hash alike). -/
 def unfoldable? (ctx : FpCtx) (n : Name) : Option ConstantInfo :=
   if ctx.cfg.fpNotations.contains n then ctx.env.find? n
   else if ctx.deep then
@@ -196,7 +196,7 @@ def statementText (n : Name) : FpM String := do
     | .inductInfo _ | .ctorInfo _ => serBlock n
     | _ => withReader (fun c => { c with block := #[n] }) (serMember n)
 
-/-- Fingerprints of one run share one memo (L3 report §3: per-root memos are quadratic). -/
+/-- Fingerprints of one run share one memo (per-root memos are quadratic). -/
 structure Fingerprinter where
   env : Environment
   cfg : Config

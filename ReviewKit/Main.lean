@@ -1,28 +1,25 @@
 /-
-ReviewKit: the `review` command line (K1). All output is JSON (format `reviewkit-report/0`).
+ReviewKit: the `review` command line. All output is JSON (format `reviewkit-report/0`).
 
   lake exe review --config <project.toml> [--import Module]... <command> [args]
 
 Commands
-  all                      closure, axioms, placeholders, imports, pin, evidence, attestations
+  all                      closure, axioms, placeholders, imports, pin, evidence
   closure                  the key-definition list; fails on project code outside the classes
   axioms [--toml]          scoped audit; --toml prints budget entries for the current sources
   placeholders             census; fails on untagged placeholders
-  imports                  D10 import rule; Foundations-name warnings
+  imports                  import rules; Foundations-name warnings
   pin [--toml]             statement pin; --toml prints pin entries for the owner to approve
   evidence                 evidence records (integrity) and the budget's and pin's links to them
-  attestations             computed staleness of every attestation (output only, D43/F11)
   record [--closure] [D...]  write fingerprint evidence records (default: pinned and budgeted
                            declarations; --closure adds the key-definition list)
-  attest --kind K --by B --initials I --date YYYY-MM-DD --scope S [--id ID] D...
-                           write the evidence for D... and print an attestation block (TOML)
   fingerprint D... [--text]  statement fingerprint and transitive digest of declarations
   impact D...              reverse dependencies (proofs included)
   faults <faults.toml>     run the fault fixtures against their expected diagnostics
   selftest                 SHA-256 test vectors
 
-Global options: --config FILE (required), --import MODULE (repeatable), --evidence-dir DIR and
---attestations FILE (override the config's evidence.dir and attestations.file).
+Global options: --config FILE (required), --import MODULE (repeatable), --evidence-dir DIR
+(overrides the config's evidence.dir).
 
 Exit status: 0 no errors, 1 errors found (or a fixture not matched), 2 setup failure.
 -/
@@ -74,15 +71,13 @@ def runCheck (cfg : Config) (env : Environment) (cmd : String) (args : List Stri
       if missing && !cfg.pinDecls.isEmpty then
         return .ok { check := "pin", diags := #[{ check := "pin", code := "pin-file-missing", message := s!"pin file {cfg.pinFile} not found" }] }
       return .ok (runPin cfg env p fp).1
-  let atts ← loadAttestations cfg.attestationsFile
   let (recs, recDiags) ← match cfg.evidenceDir with
     | some d => loadRecords d
     | none => pure (#[], #[])
   let evidenceR : IO (Except String Report) := do
     match budget?, pins? with
-    | .ok (b, _), .ok (p, _) => return .ok (runEvidence cfg env recs recDiags b p atts fp).1
+    | .ok (b, _), .ok (p, _) => return .ok (runEvidence cfg env recs recDiags b p fp).1
     | .error e, _ | _, .error e => return .error e
-  let attestationsR : Report := (runAttestations env recs atts fp).1
   match cmd with
   | "closure" => return .ok #[runClosure cfg env]
   | "axioms" => return (← axiomsR).map (#[·])
@@ -90,7 +85,6 @@ def runCheck (cfg : Config) (env : Environment) (cmd : String) (args : List Stri
   | "imports" => return .ok #[runImports cfg env]
   | "pin" => return (← pinR).map (#[·])
   | "evidence" => return (← evidenceR).map (#[·])
-  | "attestations" => return .ok #[attestationsR]
   | "impact" => return .ok #[runImpact cfg env (args.filter (!·.startsWith "--") |>.toArray.map String.toName)]
   | "all" =>
     let a ← axiomsR
@@ -98,11 +92,11 @@ def runCheck (cfg : Config) (env : Environment) (cmd : String) (args : List Stri
     let e ← evidenceR
     match a, p, e with
     | .ok a, .ok p, .ok e =>
-      return .ok #[runClosure cfg env, a, runPlaceholders cfg env, runImports cfg env, p, e, attestationsR]
+      return .ok #[runClosure cfg env, a, runPlaceholders cfg env, runImports cfg env, p, e]
     | .error e, _, _ | _, .error e, _ | _, _, .error e => return .error e
   | _ => return .error s!"unknown command {cmd}"
 
-/-! ## Fault fixtures (D27 test 1, D43/F21) -/
+/-! ## Fault fixtures -/
 
 structure Expect where
   code : String
@@ -130,7 +124,6 @@ structure Case where
   impacted : Array (Name × Array Name)
   pinDecls : Option (Array Name)
   evidence : Option String
-  attestations : Option String
   keys : Array (Name × String)
   /-- `fpcompare` cases: (a, b, level, same). -/
   compares : Array (Name × Name × String × Bool)
@@ -144,7 +137,7 @@ def decodeCases (path : System.FilePath) (t : Lake.Toml.Table) : CfgM (Array Cas
   for c in ← getTables t `case path.toString do
     checkKeys c ["name", "kind", "modules", "command", "args", "abstract", "budget", "pin",
       "class", "stand_in", "orders", "expect", "trace", "impact", "pin_decls", "key", "compare",
-      "evidence", "attestations"] "case"
+      "evidence"] "case"
     let name := (← getStr c `name "case").getD "?"
     let ctx := s!"case {name}"
     let kind := (← getStr c `kind ctx).getD "fault"
@@ -185,11 +178,10 @@ def decodeCases (path : System.FilePath) (t : Lake.Toml.Table) : CfgM (Array Cas
     let budget ← getStr c `budget ctx
     let pin ← getStr c `pin ctx
     let evidence ← getStr c `evidence ctx
-    let attestations ← getStr c `attestations ctx
     let orders := if orders.isEmpty then #["forward"] else orders
     out := out.push { name, kind, modules, command, args, abstract, budget, pin,
                       extraClasses := classes, standIns, orders, expects, traces, impacted,
-                      pinDecls, evidence, attestations, keys, compares }
+                      pinDecls, evidence, keys, compares }
   return out
 
 def diagMatches (e : Expect) (d : Diag) : Bool :=
@@ -203,7 +195,6 @@ def runCase (base : Config) (c : Case) (order : String) : IO (Array String × Js
     budgetFile := (c.budget.map System.FilePath.mk).orElse fun _ => base.budgetFile
     pinFile := (c.pin.map System.FilePath.mk).orElse fun _ => base.pinFile
     evidenceDir := (c.evidence.map System.FilePath.mk).orElse fun _ => base.evidenceDir
-    attestationsFile := (c.attestations.map System.FilePath.mk).orElse fun _ => base.attestationsFile
     -- an overriding abstract module is classed `abstract` like the configured one
     classes := (match c.abstract with
       | some m => #[({ tag := "abstract", modules := #[m] } : ClosureClass)]
@@ -300,8 +291,8 @@ def runOneCase (base : Config) (path : System.FilePath) (idx : Nat) (order : Str
     let (fails, diags) ← runCase base c order
     return Json.mkObj [("failures", Json.arr (fails.map Json.str)), ("diagnostics", diags)]
 
-/-- Run every case, each in its own child process: the environment of one case (Mathlib and
-Tau Ceti) is freed before the next, and a crash fails only that case, as a setup failure. -/
+/-- Run every case, each in its own child process: the environment of one case (a large
+library) is freed before the next, and a crash fails only that case, as a setup failure. -/
 def runFaults (base : Config) (path : System.FilePath) : IO (Bool × Json) := do
   match ← loadCases path with
   | .error e => return (false, Json.mkObj [("setup_error", Json.str e)])
@@ -339,21 +330,19 @@ open ReviewKit.CLI
 
 def usage : String :=
   "usage: lake exe review --config <project.toml> <command> [args]\n" ++
-  "commands: all closure axioms placeholders imports pin evidence attestations record attest fingerprint impact faults selftest"
+  "commands: all closure axioms placeholders imports pin evidence record fingerprint impact faults selftest"
 
 def main (argv : List String) : IO UInt32 := do
   let out (j : Json) : IO Unit := IO.println j.pretty
   let rec split (xs : List String) (cfg : Option String) (imps rest : List String)
-      (ev at_ : Option String) :
-      Option String × List String × List String × Option String × Option String :=
+      (ev : Option String) : Option String × List String × List String × Option String :=
     match xs with
-    | "--config" :: p :: tl => split tl (some p) imps rest ev at_
-    | "--import" :: m :: tl => split tl cfg (imps ++ [m]) rest ev at_
-    | "--evidence-dir" :: d :: tl => split tl cfg imps rest (some d) at_
-    | "--attestations" :: f :: tl => split tl cfg imps rest ev (some f)
-    | x :: tl => split tl cfg imps (rest ++ [x]) ev at_
-    | [] => (cfg, imps, rest, ev, at_)
-  let (cfgPath?, extraImports, rest, evOverride, attOverride) := split argv none [] [] none none
+    | "--config" :: p :: tl => split tl (some p) imps rest ev
+    | "--import" :: m :: tl => split tl cfg (imps ++ [m]) rest ev
+    | "--evidence-dir" :: d :: tl => split tl cfg imps rest (some d)
+    | x :: tl => split tl cfg imps (rest ++ [x]) ev
+    | [] => (cfg, imps, rest, ev)
+  let (cfgPath?, extraImports, rest, evOverride) := split argv none [] [] none
   let cfgPath? := cfgPath?.orElse fun _ => none
   let cmd := rest.headD "help"
   let args := rest.drop 1
@@ -368,8 +357,7 @@ def main (argv : List String) : IO UInt32 := do
   let cfg ← match ← loadConfig cfgPath with
     | .ok c => pure { c with
         imports := c.imports ++ extraImports.toArray.map String.toName
-        evidenceDir := (evOverride.map System.FilePath.mk).orElse fun _ => c.evidenceDir
-        attestationsFile := (attOverride.map System.FilePath.mk).orElse fun _ => c.attestationsFile }
+        evidenceDir := (evOverride.map System.FilePath.mk).orElse fun _ => c.evidenceDir }
     | .error e => do
       out (envelope cmd cfgPath false [("setup_error", Json.str e)])
       return 2
@@ -408,45 +396,26 @@ def main (argv : List String) : IO UInt32 := do
         (if args.contains "--text" then [("statement_text", Json.str t)] else [])))
     out (envelope cmd cfgPath ok [("fingerprints", Json.arr rows)])
     return if ok then 0 else 1
-  if cmd == "record" || cmd == "attest" then
-    let valued := ["--kind", "--by", "--initials", "--date", "--scope", "--id"]
-    let rec opts (xs : List String) (kv : List (String × String)) (pos : List String) :
-        List (String × String) × List String :=
-      match xs with
-      | k :: v :: tl => if valued.contains k then opts tl (kv ++ [(k, v)]) pos
-                        else opts (v :: tl) kv (pos ++ [k])
-      | [k] => (kv, pos ++ [k])
-      | [] => (kv, pos)
-    let (kv, pos) := opts args [] []
-    let get (k : String) : String := (kv.lookup k).getD ""
+  if cmd == "record" then
+    let pos := args
     let some dir := cfg.evidenceDir | do
       out (envelope cmd cfgPath false [("setup_error", Json.str "no evidence directory: set evidence.dir or --evidence-dir")])
       return 2
     let named := (pos.filter (!·.startsWith "--")).map String.toName
     let mut decls : Array Name := named.toArray
-    if cmd == "record" && decls.isEmpty then
+    if decls.isEmpty then
       decls := cfg.pinDecls
       match ← loadEntries cfg.budgetFile `entry "reviewkit-sorry-budget/0" with
       | .ok (b, _) => for e in b do unless decls.contains e.decl do decls := decls.push e.decl
       | .error e => do
         out (envelope cmd cfgPath false [("setup_error", Json.str e)]); return 2
-    if cmd == "record" && pos.contains "--closure" then
+    if pos.contains "--closure" then
       if let some (.arr xs) := (runClosure cfg env).data.lookup "key_list" then
         for x in xs do
           if let .ok d := x.getObjValAs? String "decl" then
             unless decls.contains d.toName do decls := decls.push d.toName
-    if cmd == "attest" then
-      let missing := ["--kind", "--by", "--initials", "--date", "--scope"].filter (get · |>.isEmpty)
-      if !missing.isEmpty || decls.isEmpty then
-        IO.eprintln "usage: review attest --kind K --by B --initials I --date YYYY-MM-DD --scope S [--id ID] DECL..."
-        out (envelope cmd cfgPath false [("setup_error", Json.str s!"attest needs {missing} and at least one declaration")])
-        return 2
-      unless attestationKinds.contains (get "--kind") && attestationRoles.contains (get "--by") && isDate (get "--date") do
-        out (envelope cmd cfgPath false [("setup_error", Json.str s!"attest: kind must be one of {attestationKinds}, by one of {attestationRoles}, date YYYY-MM-DD")])
-        return 2
     let producer : Producer := { config := cfgPath, configSha := ReviewKit.sha (← IO.FS.readFile cfgPath) }
     let mut fp : Fingerprinter := { env, cfg }
-    let mut recs := #[]
     let mut rows := #[]
     let mut ok := true
     for d in decls do
@@ -457,15 +426,8 @@ def main (argv : List String) : IO UInt32 := do
       let (r, fp1) := mkRecord env fp d
       fp := fp1
       let status ← writeRecord dir r producer
-      recs := recs.push r
       rows := rows.push (Json.mkObj [("decl", nameJson d), ("id", Json.str r.id),
         ("path", Json.str (dir / evidenceRelPath r.decl r.statement r.digest).toString), ("status", Json.str status)])
-    if cmd == "attest" then
-      unless ok do
-        out (envelope cmd cfgPath false [("records", Json.arr rows)]); return 1
-      let id := if (get "--id").isEmpty then s!"{get "--date"}-{(decls[0]!).toString}" else get "--id"
-      IO.print (attestationToml id (get "--kind") (get "--by") (get "--initials") (get "--date") (get "--scope") recs)
-      return 0
     out (envelope cmd cfgPath ok [("records", Json.arr rows)])
     return if ok then 0 else 1
   if toml && cmd == "axioms" then

@@ -1,0 +1,7 @@
+# Toy configuration for the extras fixtures (faults.toml): only the table rk_extras.py reads.
+format = "reviewkit-config/0"
+
+[extras]
+file = "extras.toml"
+providers = ["lib", "local", "placeholder"]
+require_provider = true

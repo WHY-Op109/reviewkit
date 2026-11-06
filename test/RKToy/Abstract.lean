@@ -1,4 +1,4 @@
-/- ReviewKit toy tests: a formal abstract (D39), importing only Foundations. -/
+/- ReviewKit toy tests: a formal abstract, importing only Foundations. -/
 import RKToy.Foundations
 noncomputable section
 namespace RKToy.Abstract
@@ -6,7 +6,7 @@ open RKToy.Foundations
 opaque DmodPt : NonemptyType.{0}
 @[placeholder] def Dmod : Type := DmodPt.type
 instance : Nonempty Dmod := DmodPt.property
-/-- A structure placeholder: only the attribute finds it (L3 report §2). -/
+/-- A structure placeholder: only the attribute finds it. -/
 @[placeholder] structure Curve where
   carrier : Thing
   genus : Nat

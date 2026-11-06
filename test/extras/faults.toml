@@ -1,0 +1,92 @@
+# Fault fixtures for scripts/rk_extras.py, on toy data. A fault must produce the diagnostics it
+# names and no other error; a control must produce no unexpected error; exit 2 fails any case.
+#   python3 -I scripts/rk_faults.py test/extras/faults.toml
+# Commands run in this directory; project.toml is the toy config.
+format = "reviewkit-policy-faults/0"
+
+[[case]]
+name = "extras: the clean toy extras join the graph"
+kind = "control"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-clean.toml",
+  "--closure", "closure.json", "--out", "/dev/null"]
+
+[[case]]
+name = "extras: an id that is no graph node (a rename)"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-stale.toml"]
+[[case.expect]]
+code = "extras-stale-id"
+decl = "Toy.A.renamed"
+
+[[case]]
+name = "extras: a misspelt key in an entry"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-unknown-key.toml"]
+[[case.expect]]
+code = "extras-unknown-key"
+decl = "Toy.A.bar"
+
+[[case]]
+name = "extras: an unknown top-level table"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-unknown-top.toml"]
+[[case.expect]]
+code = "extras-unknown-key"
+
+[[case]]
+name = "extras: a provider outside extras.providers"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-bad-provider.toml"]
+[[case.expect]]
+code = "extras-provider-unknown"
+decl = "Toy.A.bar"
+
+[[case]]
+name = "extras: an entry without a provider (require_provider)"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-missing-provider.toml"]
+[[case.expect]]
+code = "extras-provider-missing"
+decl = "Toy.B.baz"
+
+[[case]]
+name = "extras: a flag that is not a boolean"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-type.toml"]
+[[case.expect]]
+code = "extras-type"
+decl = "Toy.A.bar"
+
+[[case]]
+name = "extras: an unknown format version"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-format.toml"]
+[[case.expect]]
+code = "extras-format"
+
+[[case]]
+name = "extras: a file that is not TOML"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-syntax.toml"]
+[[case.expect]]
+code = "extras-format"
+
+[[case]]
+name = "extras: a key entry outside the closure's key list (warning)"
+kind = "fault"
+command = "extras"
+args = ["--config", "project.toml", "--graph", "graph.json", "--extras", "extras-outside.toml",
+  "--closure", "closure.json"]
+[[case.expect]]
+code = "extras-key-outside-closure"
+decl = "Toy.A.helper"
+severity = "warning"

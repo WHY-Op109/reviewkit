@@ -1,5 +1,5 @@
 /-
-ReviewKit: the checks of K1 — closure, axioms (scoped, with the fingerprint-bound sorry budget),
+ReviewKit: the checks — closure, axioms (scoped, with the fingerprint-bound sorry budget),
 placeholders, imports (with the Foundations-name warning), statement pin and impact.
 -/
 import Lean
@@ -10,7 +10,7 @@ open Lean
 
 namespace ReviewKit
 
-/-! ## (a) Closure: the key-definition list (D39, D40 Finding 2) -/
+/-! ## (a) Closure: the key-definition list -/
 
 def pathTo (parent : Std.HashMap Name Name) (n : Name) : Array Name := Id.run do
   let mut out := #[n]
@@ -69,7 +69,7 @@ def runClosure (cfg : Config) (env : Environment) : Report := Id.run do
       | none => [])
   { check := "closure", diags, data := [("roots", toJson roots.size), ("visited", toJson visited.size), ("background_constants", toJson background), ("counts", Json.mkObj (tags.toList.map fun t => (t, toJson (counts.getD t 0)))), ("counts_direct_from_project", Json.mkObj (tags.toList.map fun t => (t, toJson (directCounts.getD t 0)))), ("key_list", Json.arr entryJson)] }
 
-/-! ## (b) Axioms: scoped audit with the sorry budget (Q13, D43/F21) -/
+/-! ## (b) Axioms: scoped audit with the sorry budget -/
 
 structure AxState where
   memo : Std.HashMap Name NameSet := {}
@@ -77,8 +77,8 @@ structure AxState where
   cycles : Array Name := #[]
 
 /-- Axioms a declaration depends on. Inductive blocks are one node, so the result is the same
-for every traversal order (D43/F21: the prototype's sentinel could memoise an incomplete set for
-a constructor). An unexpected cycle outside a block is recorded, never silently memoised. -/
+for every traversal order (an in-progress sentinel could memoise an incomplete set for a
+constructor). An unexpected cycle outside a block is recorded, never silently memoised. -/
 partial def axiomsOf (env : Environment) (proofs : Bool) (n : Name) : StateM AxState NameSet := do
   let members := blockOf env n
   let rep := members[0]!
@@ -104,14 +104,12 @@ structure FpEntry where
   digest : String
   /-- The id of the fingerprint evidence record the entry was generated from (optional). -/
   evidence : String := ""
-  /-- The id of the owner attestation that holds the approval's scope wording (optional). -/
-  attestation : String := ""
   deriving Inhabited
 
 /-- The keys a budget entry (`entry`) or a pin entry (`pin`) may have. `approved` is the owner's
-"YYYY-MM-DD <initials>"; the kit checks only that it is a string and never reads it (D44). -/
+"YYYY-MM-DD <initials>"; the kit checks only that it is a string and never reads it. -/
 def fpEntryKeys (key : Name) : List String :=
-  ["decl", "statement", "digest", "evidence", "approved", "attestation"] ++
+  ["decl", "statement", "digest", "evidence", "approved"] ++
     (if key == `entry then ["source", "kind"] else [])
 
 /-- Read `[[key]]` entries from a budget or pin file. Unknown keys are errors (data format v0). -/
@@ -133,11 +131,10 @@ def loadFpEntries (path : System.FilePath) (key : Name) (format : String) :
         let s := (← getStr e `statement ctx).getD ""
         let g := (← getStr e `digest ctx).getD ""
         let ev := (← getStr e `evidence ctx).getD ""
-        let att := (← getStr e `attestation ctx).getD ""
         let _ ← getStr e `approved ctx
         for k in [`source, `kind] do let _ ← getStr e k ctx
         if d.isAnonymous || s.isEmpty then cfgErr s!"{path}: an entry lacks decl or statement"
-        out := out.push { decl := d, statement := s, digest := g, evidence := ev, attestation := att }
+        out := out.push { decl := d, statement := s, digest := g, evidence := ev }
       return out : CfgM (Array FpEntry)).run #[]
     if errs.isEmpty then return .ok entries else return .error (String.intercalate "; " errs.toList)
 
@@ -154,8 +151,8 @@ def checkedFor (cfg : Config) (target : Name) : Name :=
   | none => target
 
 /-- Constants reachable from the project's own constants with proofs, through every
-non-background module: the region in which every `sorry` is traced to its source (Tau Ceti
-included, Q13). Returns the region and the background constants at its border. -/
+non-background module: the region in which every `sorry` is traced to its source (reviewed
+providers included). Returns the region and the background constants at its border. -/
 def traceRegion (cfg : Config) (env : Environment) : NameSet × NameSet := Id.run do
   let mut stack := projectConsts cfg env
   let mut seen : NameSet := {}
@@ -258,7 +255,7 @@ def runAxioms (cfg : Config) (env : Environment) (budget : Array FpEntry) (budge
        ("sorry_sources", Json.arr srcJson),
        ("debt", Json.mkObj [("placeholder_debt", toJson placeholders), ("proof_debt", toJson proofDebt),
          ("copied_proof_debt", toJson (0 : Nat)),
-         ("copied_proof_debt_note", Json.str "no copy record: the copy tool (K15) is not built")]),
+         ("copied_proof_debt_note", Json.str "no copy record: copied proofs are not tracked")]),
        ("traces", Json.arr traces)] }, fp)
 
 /-- TOML text for budget entries of the current sorry sources (for the owner to approve). -/
@@ -278,7 +275,7 @@ def suggestBudget (cfg : Config) (env : Environment) (fp : Fingerprinter) : Stri
       s!"evidence = \"{evidenceId s stmt dig}\"\n\n"
   out
 
-/-! ## (c) Placeholders: the census (K2) -/
+/-! ## (c) Placeholders: the census -/
 
 def runPlaceholders (cfg : Config) (env : Environment) : Report := Id.run do
   let consts := (projectConsts cfg env).filter fun n =>
@@ -311,7 +308,7 @@ def runPlaceholders (cfg : Config) (env : Environment) : Report := Id.run do
       ("module", (moduleOf? env n).map nameJson |>.getD Json.null)])
   { check := "placeholders", diags, data := [("placeholder_count", toJson tagged.size), ("census", Json.arr census)] }
 
-/-! ## (d) Imports: the D10 rule and the Foundations-name warning (Q14) -/
+/-! ## (d) Imports: the import rules and the Foundations-name warning -/
 
 def runImports (cfg : Config) (env : Environment) : Report := Id.run do
   let mut diags := #[]
@@ -351,7 +348,7 @@ def runImports (cfg : Config) (env : Environment) : Report := Id.run do
     diags := diags.push { check := "imports", code := if req then "foundations-name-required" else "foundations-name", severity := .warning, decl := d, message := (if req then s!"the abstract uses the substantial object {d} directly; use its Foundations name" else if reExported.contains d then s!"the abstract uses {d} directly although Foundations re-exports it; use the Foundations name" else s!"the abstract uses {d} directly; it is neither basic vocabulary nor reached through a Foundations name") ++ s!" (used by {shown}{if us.size > 3 then " ..." else ""})" }
   { check := "imports", diags, data := [("modules_checked", toJson checked)] }
 
-/-! ## (e) The statement pin (D40 Finding 3, D43/F10) -/
+/-! ## (e) The statement pin -/
 
 def runPin (cfg : Config) (env : Environment) (pins : Array FpEntry) (fp : Fingerprinter) :
     Report × Fingerprinter := Id.run do

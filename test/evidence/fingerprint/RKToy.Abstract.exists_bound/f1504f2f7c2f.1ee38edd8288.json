@@ -7,9 +7,9 @@
  "producer":
  {"tool": "reviewkit",
   "lean_version": "4.36.0-rc2",
-  "kit_version": "0.2.0",
+  "kit_version": "0.3.0",
   "config_sha256":
-  "sha256:fa0ff09c97ad58c2c74c644e375548267ac8df3046b1f313fab4ee36bf9a197a",
+  "sha256:48491405a02960e7bf02631c9519f6615f36cb6ea5f6c87562339970235970bc",
   "config": "test/project.toml"},
  "module": "RKToy.Abstract",
  "kind": "fingerprint",

@@ -1,6 +1,6 @@
 /-
 ReviewKit: SHA-256 (FIPS 180-4), written for the kit so that fingerprints do not depend on
-Lean's internal, unversioned `hash` functions (L3 report §3). Checked by `review selftest`
+Lean's internal, unversioned `hash` functions. Checked by `review selftest`
 against the FIPS test vectors.
 -/
 

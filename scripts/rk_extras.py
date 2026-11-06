@@ -1,4 +1,4 @@
-"""rk_extras.py: join the tracker graph with the extras file (reviewkit-extras/0, K8, D12).
+"""rk_extras.py: join the tracker graph with the extras file (reviewkit-extras/0).
 
     python3 -I rk_extras.py --config C [--root DIR] --graph GRAPH.json [--extras FILE]
                             [--closure CLOSURE.json] [--out CARDS.json]

@@ -1,2 +1,0 @@
-M	src/main.txt
-R087	kit/old.py	src/old.py

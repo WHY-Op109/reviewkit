@@ -1,4 +1,4 @@
--- Planted fault (axioms, D43/F21): a sorry inside a constructor type. The inductive and its
+-- Planted fault (axioms): a sorry inside a constructor type. The inductive and its
 -- constructor refer to each other; every root order must trace the sorry.
 import RKToy.Abstract
 namespace RKToy.Bad.Cycle

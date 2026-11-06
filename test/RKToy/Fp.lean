@@ -1,4 +1,4 @@
-/- ReviewKit toy tests: fingerprint variants (V7, D43/F03). -/
+/- ReviewKit toy tests: fingerprint variants. -/
 import RKToy.Foundations
 noncomputable section
 namespace RKToy.Fp
@@ -57,7 +57,7 @@ namespace T0
 theorem t (n : Nat) : ∃ b, n < b := ⟨n + 1, Nat.lt_succ_self n⟩
 def d (n : Nat) : Nat := Classical.choose (t n)
 end T0
-/-- Distinct opaque objects of the same type (D43/F03, Astra's probe A). -/
+/-- Distinct opaque objects of the same type. -/
 @[placeholder] opaque ObjA : Type
 @[placeholder] opaque ObjB : Type
 def SwapAA : Type := ObjA → ObjA

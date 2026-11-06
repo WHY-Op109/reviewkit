@@ -1,8 +1,0 @@
-# ReviewKit schema test instance (data format v0); toy names only.
-format = "reviewkit-policy-faults/0"
-
-[[case]]
-name = "a fault with nothing expected"
-kind = "fault"
-command = "extras"
-dir = "x"

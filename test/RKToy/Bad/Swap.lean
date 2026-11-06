@@ -1,4 +1,4 @@
--- Planted fault (fingerprint / pin, D43/F03): a statement with one opaque object swapped for
+-- Planted fault (fingerprint / pin): a statement with one opaque object swapped for
 -- another of the same type must not match the pin; an exact copy (the control) must.
 import RKToy.Foundations
 namespace RKToy.Bad.Swap

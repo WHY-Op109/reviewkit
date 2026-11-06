@@ -1,6 +1,0 @@
-[
- {"id": 1, "user": null, "body": "", "state": "APPROVED",
-  "commit_id": "1111111111111111111111111111111111111111", "submitted_at": "2026-11-01T09:00:00Z"},
- {"id": 2, "user": {"login": "toy-owner", "type": "User"}, "body": "", "state": "APPROVED",
-  "commit_id": "1111111111111111111111111111111111111111", "submitted_at": "2026-11-01T10:00:00Z"}
-]

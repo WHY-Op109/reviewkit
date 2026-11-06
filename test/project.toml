@@ -1,5 +1,5 @@
 # ReviewKit's own test configuration: the toy library in test/ (core Lean only).
-#   cd reviewkit && lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
+#   lake build RKToy RKToyBad && lake exe review --config test/project.toml faults test/faults.toml
 format = "reviewkit-config/0"
 
 [project]
@@ -53,6 +53,3 @@ modules = ["RKToy"]
 
 [evidence]
 dir = "test/evidence"
-
-[attestations]
-file = "test/reviews/attestations.toml"

@@ -1,5 +1,5 @@
-/- ReviewKit toy tests: a reviewed upstream provider (plays the role Tau Ceti plays for GLCinLean:
-walked by the closure, fingerprinted by content). -/
+/- ReviewKit toy tests: a reviewed upstream provider library
+(walked by the closure, fingerprinted by content). -/
 namespace RKUp
 def UpObj : Type := Nat
 structure Thing where
