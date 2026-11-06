@@ -1,0 +1,37 @@
+{
+  "format": "reviewkit-report/0",
+  "command": "extras",
+  "config": "test/project.toml",
+  "ok": false,
+  "reports": [
+    {
+      "check": "extras",
+      "ok": false,
+      "errors": 1,
+      "warnings": 1,
+      "diagnostics": [
+        {
+          "check": "extras",
+          "code": "extras-stale-id",
+          "severity": "error",
+          "message": "RKToy.Old is no node of the graph",
+          "decl": "RKToy.Old",
+          "file": "extras.toml"
+        },
+        {
+          "check": "extras",
+          "code": "extras-key-outside-closure",
+          "severity": "warning",
+          "message": "a key entry outside the closure",
+          "decl": "RKToy.Foundations.Thing",
+          "module": "RKToy.Foundations",
+          "path": [
+            "RKToy.Abstract.main",
+            "RKToy.Foundations.Thing"
+          ]
+        }
+      ],
+      "graph": "graph.json"
+    }
+  ]
+}

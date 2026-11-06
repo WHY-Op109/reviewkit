@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-attestations-0.schema.json",
+  "title": "Human attestations",
+  "description": "Human attestation records (TOML, human-owned, D43/F11). Each attestation is bound to fingerprints and evidence ids; whether a binding is current or stale is computed by `review attestations` and never written here (so there is no status field). `kind` keeps the owner's check (tier 4), the expert's review (tier 5: recorded separately, gates nothing, D43/F06) and a provisional baseline (D44) apart.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-attestations/0",
+      "description": "The format identifier, `reviewkit-attestations/0`."
+    },
+    "attestation": {
+      "type": "array",
+      "description": "Attestations, appended by the owner.",
+      "items": {
+        "$ref": "#/$defs/attestation"
+      }
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "attestation": {
+      "type": "object",
+      "description": "One attestation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique, chosen by the owner, never reused.",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "kind": {
+          "enum": [
+            "provisional-baseline",
+            "owner-check",
+            "expert-review"
+          ],
+          "description": "`provisional-baseline`: an interface baseline, not a fidelity check; `owner-check`: the owner's one-time check (tier 4); `expert-review`: the expert's review (tier 5, gates nothing)."
+        },
+        "by": {
+          "enum": [
+            "owner",
+            "expert"
+          ],
+          "description": "Who attests: the owner for a baseline or an owner check, the expert for an expert review."
+        },
+        "initials": {
+          "type": "string",
+          "description": "The attesting person's initials.",
+          "minLength": 1
+        },
+        "date": {
+          "$ref": "#/$defs/date",
+          "description": "The day of the attestation."
+        },
+        "scope": {
+          "type": "string",
+          "description": "What exactly is attested, in the attester's words.",
+          "minLength": 1
+        },
+        "binding": {
+          "type": "array",
+          "description": "What the attestation is bound to.",
+          "items": {
+            "$ref": "#/$defs/binding"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "by",
+        "initials",
+        "date",
+        "scope",
+        "binding"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "expert-review"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "by": {
+                "const": "expert"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "by": {
+                "const": "owner"
+              }
+            }
+          },
+          "description": "An expert review is by the expert; the other kinds are by the owner."
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "description": "One binding: a declaration at given fingerprints, with the evidence records that hold them.",
+      "properties": {
+        "decl": {
+          "$ref": "#/$defs/decl"
+        },
+        "statement": {
+          "$ref": "#/$defs/sha256",
+          "description": "Required: the statement fingerprint attested."
+        },
+        "digest": {
+          "description": "Optional: if set, a digest change makes the binding stale; empty means unset.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Evidence ids (at least one): the records the attestation rests on.",
+          "items": {
+            "$ref": "#/$defs/evidenceId"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decl",
+        "statement",
+        "evidence"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "description": "A calendar date, `YYYY-MM-DD`.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "decl": {
+      "type": "string",
+      "description": "An absolute Lean declaration id as `Name.toString` prints it (the ids `tracker graph` uses).",
+      "minLength": 1
+    },
+    "evidenceId": {
+      "type": "string",
+      "description": "An evidence id: `<kind>:<rest>` with kind `fingerprint`, `readback` or `comparator`.",
+      "pattern": "^(fingerprint|readback|comparator):\\S+$"
+    },
+    "sha256": {
+      "type": "string",
+      "description": "A SHA-256 hash: `sha256:` followed by 64 lowercase hex digits.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

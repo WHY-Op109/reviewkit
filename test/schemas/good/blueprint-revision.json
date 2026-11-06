@@ -1,0 +1,75 @@
+{
+  "format": "reviewkit-blueprint-revision/0",
+  "id": "rev-2026-11-20-1",
+  "request": {
+    "reason": "split-node",
+    "detail": "main is too large",
+    "nodes": [
+      "RKToy.Abstract.main"
+    ],
+    "task_id": "2026-11-20T0300Z-replace-RKToy.Abstract.Curve-1"
+  },
+  "base_commit": "0123456789abcdef0123456789abcdef01234567",
+  "model": {
+    "provider": "codex",
+    "model": "gpt-example-1",
+    "effort": "xhigh",
+    "cli_version": "codex-cli 9.9.9"
+  },
+  "prompt_sha256": "sha256:cce8be0103f3158fb4e567bcc8d416eeb6b90ca343ca0ace0125cd5bad9306e6",
+  "schema_sha256": "sha256:527d44e056dd5c76d06a3ac0ea4c65243bda514d670fd84287e4682a6bab7d49",
+  "usage": {},
+  "repaired": false,
+  "output": {
+    "summary": "Split the main node into a lemma and the theorem.",
+    "plan_edits": [
+      {
+        "file": "plans/RKToy/Abstract.toml",
+        "node": "RKToy.Abstract.mainLemma",
+        "op": "add",
+        "field": null,
+        "before": null,
+        "after": "[[node]]\nid = \"mainLemma\"\nkind = \"theorem\""
+      },
+      {
+        "file": "plans/RKToy/Abstract.toml",
+        "node": "RKToy.Abstract.main",
+        "op": "change",
+        "field": "deps",
+        "before": "[]",
+        "after": "[\"mainLemma\"]"
+      },
+      {
+        "file": "plans/RKToy/Abstract.toml",
+        "node": null,
+        "op": "change",
+        "field": "desc",
+        "before": "\"Toy statements.\"",
+        "after": "\"The toy statement layer.\""
+      }
+    ],
+    "blueprint_edits": [
+      {
+        "node": "main-lemma",
+        "op": "add",
+        "text": "The lemma behind the main theorem."
+      }
+    ],
+    "flagged": [
+      {
+        "node": "RKToy.Abstract.main",
+        "flags": [
+          "key"
+        ],
+        "note": "only deps change"
+      }
+    ],
+    "rationale": "The proof factors through the lemma.",
+    "sources": [
+      {
+        "locator": "Toy paper, Lemma 2.1",
+        "note": null
+      }
+    ]
+  }
+}

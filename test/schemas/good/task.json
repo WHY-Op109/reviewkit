@@ -1,0 +1,45 @@
+{
+  "format": "reviewkit-task/0",
+  "id": "2026-11-20T0300Z-replace-RKToy.Abstract.Curve-1",
+  "kind": "replace-placeholder",
+  "target": {
+    "decl": "RKToy.Abstract.Curve",
+    "module": "RKToy.Abstract",
+    "plan_node": "RKToy.Abstract.Curve",
+    "plan_file": "plans/RKToy/Abstract.toml"
+  },
+  "goal": "1b",
+  "attempt": 1,
+  "attempt_limit": 3,
+  "base_commit": "0123456789abcdef0123456789abcdef01234567",
+  "inputs": [
+    {
+      "role": "tracker-ready",
+      "path": null,
+      "sha256": "sha256:b24d6d33736ecd5604a4b17bc9c6481039fac362bb7df044ef1c10a2bfd21db6"
+    },
+    {
+      "role": "placeholder-census",
+      "path": "out/placeholders.json",
+      "sha256": "sha256:7969bf2d3a9ceff9f774531d05be1923d0719b2b75db0e145e8af7b149aaf71f"
+    },
+    {
+      "role": "attempt-history",
+      "path": "queue/attempts.json",
+      "sha256": "sha256:259aa8ef98a8b91de574cd904138ef643240c23080cf24da4793a6f10a43fa9d"
+    }
+  ],
+  "prompt": {
+    "template": "prompts/worker.md",
+    "template_sha256": "sha256:5cde0f1298f41f7d1c8b907a36992a7a513225a2615bd6e307bf1a9149b06b40",
+    "sha256": "sha256:cce8be0103f3158fb4e567bcc8d416eeb6b90ca343ca0ace0125cd5bad9306e6"
+  },
+  "result_schema_sha256": "sha256:527d44e056dd5c76d06a3ac0ea4c65243bda514d670fd84287e4682a6bab7d49",
+  "model": {
+    "provider": "claude",
+    "model": "claude-example-1",
+    "effort": "high"
+  },
+  "deferred_debt": false,
+  "created": "2026-11-20T03:00:00Z"
+}

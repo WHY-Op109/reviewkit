@@ -1,0 +1,16 @@
+format = "reviewkit-extras/0"
+
+[decl."Toy.A.foo"]
+provider = "lib"
+key = true
+
+[decl."Toy.A.bar"]
+provider = "local"
+chain = true
+
+[decl."Toy.B.baz"]
+provider = "local"
+
+[decl."Toy.B.qux"]
+provider = "local"
+chain = true

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-extras-0.schema.json",
+  "title": "Extras keyed by declaration id",
+  "description": "Project facts that do not belong in the tracker plans (D12, K8), keyed by absolute declaration id (each must be a node of `tracker graph --all`). Agent-editable; the flags named in the config's `flagged.flags` are the owner's decision (D19). Review tags and fingerprints never go here: they live in the evidence directory (machine) and the attestations file (human), D43/F11. Whether `provider` is required and which values it takes come from the config (`extras.require_provider`, `extras.providers`), so the schema checks only its type.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-extras/0",
+      "description": "The format identifier, `reviewkit-extras/0`."
+    },
+    "decl": {
+      "type": "object",
+      "description": "One entry per declaration id.",
+      "propertyNames": {
+        "minLength": 1,
+        "description": "An absolute declaration id."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "description": "The extras of one declaration.",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Where the object comes from; one of the config's `extras.providers`.",
+          "minLength": 1
+        },
+        "key": {
+          "type": "boolean",
+          "description": "A key definition: stands for an object the statement names (full review tiers)."
+        },
+        "chain": {
+          "type": "boolean",
+          "description": "A member of the chain of definitions the main statement is built from (D39)."
+        },
+        "upstream": {
+          "type": "string",
+          "description": "The provider declaration this name re-exports.",
+          "minLength": 1
+        },
+        "blueprint": {
+          "type": "string",
+          "description": "The Markdown blueprint node id (D19).",
+          "minLength": 1
+        },
+        "hypotheses": {
+          "type": "array",
+          "description": "Hypotheses the card lists.",
+          "items": {
+            "type": "string",
+            "description": "A hypothesis, in words.",
+            "minLength": 1
+          }
+        },
+        "note": {
+          "type": "string",
+          "description": "A free-text note."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

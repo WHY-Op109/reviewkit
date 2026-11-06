@@ -1,0 +1,17 @@
+format = "reviewkit-extras/9"
+
+[decl."Toy.A.foo"]
+provider = "lib"
+key = true
+upstream = "Lib.Foo"
+
+[decl."Toy.A.bar"]
+provider = "local"
+chain = true
+hypotheses = ["h1"]
+note = "a toy chain member"
+
+[decl."Toy.B.baz"]
+provider = "placeholder"
+key = true
+blueprint = "baz-node"

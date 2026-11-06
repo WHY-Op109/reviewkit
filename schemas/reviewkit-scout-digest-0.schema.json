@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-scout-digest-0.schema.json",
+  "title": "Scout digest",
+  "description": "The scout's digest (K13, D24): the daily structured checks and, weekly, the broad searches by each model. Scout hits never reset a review (D39): `resets_reviews` is always false, and freshness of fidelity reviews ignores this record.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-scout-digest/0",
+      "description": "The format identifier, `reviewkit-scout-digest/0`."
+    },
+    "date": {
+      "$ref": "#/$defs/date",
+      "description": "The digest's day."
+    },
+    "mode": {
+      "enum": [
+        "daily",
+        "weekly"
+      ],
+      "description": "The daily structured checks, or the weekly broad search."
+    },
+    "sources_checked": {
+      "type": "array",
+      "description": "Every source checked, with its result.",
+      "items": {
+        "type": "object",
+        "description": "A source check.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "The source.",
+            "minLength": 1
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The revision or query checked against (for example the pinned commit), or null."
+          },
+          "ok": {
+            "type": "boolean",
+            "description": "The check ran."
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why it failed, or null."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "ref",
+          "ok",
+          "error"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ok": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "error": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "description": "A failed check says why."
+          }
+        ]
+      }
+    },
+    "hits": {
+      "type": "array",
+      "description": "The merged hits.",
+      "items": {
+        "$ref": "#/$defs/output/properties/hits/items"
+      }
+    },
+    "searches": {
+      "type": "array",
+      "description": "The weekly broad searches, one per model (absent on daily digests).",
+      "items": {
+        "type": "object",
+        "description": "One model's search.",
+        "properties": {
+          "model": {
+            "$ref": "#/$defs/model"
+          },
+          "prompt_sha256": {
+            "$ref": "#/$defs/sha256",
+            "description": "sha256 of the exact prompt text sent (template filled in)."
+          },
+          "schema_sha256": {
+            "$ref": "#/$defs/sha256",
+            "description": "sha256 of the output schema passed to the CLI (`$defs/output` of this schema, serialised)."
+          },
+          "usage": {
+            "$ref": "#/$defs/usage"
+          },
+          "repaired": {
+            "type": "boolean",
+            "description": "The one repair turn was used: the first answer failed schema validation."
+          },
+          "output": {
+            "$ref": "#/$defs/output"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "model",
+          "prompt_sha256",
+          "schema_sha256",
+          "usage",
+          "repaired",
+          "output"
+        ]
+      }
+    },
+    "resets_reviews": {
+      "const": false,
+      "description": "Always false: scout and literature results never invalidate fidelity reviews (D39)."
+    }
+  },
+  "required": [
+    "format",
+    "date",
+    "mode",
+    "sources_checked",
+    "hits",
+    "resets_reviews"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "output": {
+      "type": "object",
+      "description": "A broad search's result (the model-facing part of the weekly search, D24).",
+      "properties": {
+        "hits": {
+          "type": "array",
+          "description": "The hits found.",
+          "items": {
+            "type": "object",
+            "description": "One hit.",
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Which source produced it (for example an upstream repository, Mathlib, arXiv)."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "upstream-change",
+                  "new-declaration",
+                  "mathlib-pr",
+                  "arxiv-version",
+                  "stacks-change",
+                  "cache-alignment",
+                  "other"
+                ],
+                "description": "What kind of change."
+              },
+              "ref": {
+                "type": "string",
+                "description": "The reference: a commit, a pull request number, an arXiv id with version."
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A link, or null."
+              },
+              "summary": {
+                "type": "string",
+                "description": "What changed, in one or two sentences."
+              },
+              "watched_path": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The watched path it touches, or null."
+              },
+              "affected_decls": {
+                "type": "array",
+                "description": "Project declarations it may affect.",
+                "items": {
+                  "type": "string",
+                  "description": "A declaration id."
+                }
+              },
+              "triage": {
+                "type": "string",
+                "enum": [
+                  "untriaged",
+                  "relevant",
+                  "irrelevant",
+                  "needs-owner"
+                ],
+                "description": "`untriaged` (the daily script's default), `relevant`, `irrelevant`, `needs-owner` (a same-object or special-case hit on a key node)."
+              }
+            },
+            "required": [
+              "source",
+              "kind",
+              "ref",
+              "url",
+              "summary",
+              "watched_path",
+              "affected_decls",
+              "triage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Anything else worth knowing, or an empty string."
+        }
+      },
+      "required": [
+        "hits",
+        "notes"
+      ],
+      "additionalProperties": false
+    },
+    "date": {
+      "type": "string",
+      "description": "A calendar date, `YYYY-MM-DD`.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "model": {
+      "type": "object",
+      "description": "The model call, as the host ran it (never written by the model).",
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/provider"
+        },
+        "model": {
+          "type": "string",
+          "description": "The model id the CLI reported (resolved, not an alias).",
+          "minLength": 1
+        },
+        "effort": {
+          "type": "string",
+          "description": "The reasoning effort passed to the CLI, in its own vocabulary (for example `max`, `xhigh`, `high`).",
+          "minLength": 1
+        },
+        "cli_version": {
+          "type": "string",
+          "description": "The CLI's version string (`claude --version`, `codex --version`).",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model",
+        "effort",
+        "cli_version"
+      ]
+    },
+    "provider": {
+      "enum": [
+        "claude",
+        "codex"
+      ],
+      "description": "The model CLI: `claude` (Claude Code, `claude -p`) or `codex` (`codex exec`)."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "A SHA-256 hash: `sha256:` followed by 64 lowercase hex digits.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "usage": {
+      "type": "object",
+      "description": "Token and cost usage as the CLI reported it, kept verbatim (deliberately open: each CLI has its own fields).",
+      "additionalProperties": true
+    }
+  }
+}

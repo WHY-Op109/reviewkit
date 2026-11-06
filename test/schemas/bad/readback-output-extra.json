@@ -1,0 +1,54 @@
+{
+  "format": "reviewkit-readback/0",
+  "kind": "readback",
+  "id": "readback:RKToy.Abstract.main@decaf64fa662.322f390c10bc:claude:cce8be0103f3",
+  "subject": {
+    "decl": "RKToy.Abstract.main",
+    "statement": "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da",
+    "digest": "sha256:322f390c10bc6ede56806133b06461ecbefbef4d88ea5eed85ae5ea08bfb49ef",
+    "evidence": "fingerprint:RKToy.Abstract.main@decaf64fa662.322f390c10bc"
+  },
+  "slice_sha256": "sha256:3cc1f30464e76271144fb44889119f251ac7c431b7fb440e3f0346be0a4168c6",
+  "channel": "claude",
+  "model": {
+    "provider": "claude",
+    "model": "claude-example-1",
+    "effort": "max",
+    "cli_version": "9.9.9 (Claude Code)"
+  },
+  "prompt_sha256": "sha256:cce8be0103f3158fb4e567bcc8d416eeb6b90ca343ca0ace0125cd5bad9306e6",
+  "schema_sha256": "sha256:527d44e056dd5c76d06a3ac0ea4c65243bda514d670fd84287e4682a6bab7d49",
+  "usage": {
+    "input_tokens": 1200,
+    "output_tokens": 800,
+    "cache_read_input_tokens": 0,
+    "total_cost_usd": 0.21
+  },
+  "repaired": true,
+  "output": {
+    "informal_statement": "Every thing carrying a curve structure satisfies a trivial property.",
+    "objects": [
+      {
+        "name": "RKUp.Thing",
+        "meaning": "an upstream type of things"
+      }
+    ],
+    "hypotheses": [
+      {
+        "name": "h",
+        "text": "x carries a curve structure"
+      }
+    ],
+    "quantifier_structure": "for all x : Thing, Curve x implies True",
+    "placeholders": [
+      {
+        "name": "RKToy.Abstract.Curve",
+        "role": "the predicate 'is a curve'"
+      }
+    ],
+    "uncertainties": [
+      "Curve is opaque: its meaning is only its name."
+    ],
+    "source_text": "Definition 1.2 of the toy paper ..."
+  }
+}

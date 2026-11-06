@@ -1,0 +1,6 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-extras/0"
+
+[decl."RKToy.Abstract.main"]
+provider = "abstract"
+review = "checked"

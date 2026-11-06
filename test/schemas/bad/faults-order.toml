@@ -1,0 +1,7 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-faults/0"
+
+[[case]]
+name = "c"
+kind = "control"
+orders = ["sideways"]

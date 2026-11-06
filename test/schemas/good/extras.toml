@@ -1,0 +1,21 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-extras/0"
+
+[decl."RKToy.Abstract.Curve"]
+provider = "placeholder"
+key = true
+chain = true
+blueprint = "curve"
+
+[decl."RKToy.Abstract.main"]
+provider = "abstract"
+key = true
+hypotheses = ["the curve is smooth"]
+note = "the toy main theorem"
+
+[decl."RKToy.Foundations.Thing"]
+provider = "upstream"
+upstream = "RKUp.Thing"
+
+[decl."RKToy.«weird name»"]
+provider = "abstract"

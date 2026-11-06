@@ -1,0 +1,6 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-sorry-budget/0"
+
+[[entry]]
+decl = "RKToy.Abstract.main"
+statement = "decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"

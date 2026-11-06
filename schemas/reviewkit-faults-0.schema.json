@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-faults-0.schema.json",
+  "title": "Lean check fault fixtures",
+  "description": "Fault fixtures for `lake exe review faults` (TOML; A1, D27 test 1, D43/F21). Keys as `ReviewKit.CLI.decodeCases` reads them. A fault passes only if every expected diagnostic is produced and every error is expected; a control must produce no unexpected error; `fpcompare` cases compare fingerprints.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-faults/0",
+      "description": "The format identifier, `reviewkit-faults/0`."
+    },
+    "case": {
+      "type": "array",
+      "description": "The cases.",
+      "items": {
+        "$ref": "#/$defs/case"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "case": {
+      "type": "object",
+      "description": "One case.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "A descriptive name.",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "fault",
+            "control",
+            "fpcompare"
+          ],
+          "default": "fault",
+          "description": "The case kind (default fault)."
+        },
+        "modules": {
+          "type": "array",
+          "description": "Extra modules to import.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "command": {
+          "type": "string",
+          "description": "The `review` command to run (default `all`).",
+          "minLength": 1
+        },
+        "args": {
+          "type": "array",
+          "description": "The command's arguments.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "abstract": {
+          "type": "string",
+          "description": "Overrides the abstract module (classed `abstract`).",
+          "minLength": 1
+        },
+        "budget": {
+          "type": "string",
+          "description": "Overrides the sorry budget file.",
+          "minLength": 1
+        },
+        "pin": {
+          "type": "string",
+          "description": "Overrides the statement pin file.",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Overrides the evidence directory.",
+          "minLength": 1
+        },
+        "attestations": {
+          "type": "string",
+          "description": "Overrides the attestations file.",
+          "minLength": 1
+        },
+        "class": {
+          "type": "array",
+          "description": "Extra closure classes, before the configured ones.",
+          "items": {
+            "type": "object",
+            "description": "A closure class.",
+            "properties": {
+              "tag": {
+                "type": "string",
+                "description": "The tag.",
+                "minLength": 1
+              },
+              "modules": {
+                "type": "array",
+                "description": "Module prefixes.",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "tag"
+            ]
+          }
+        },
+        "stand_in": {
+          "type": "array",
+          "description": "Stand-ins: `decl` is checked as if it were `for`.",
+          "items": {
+            "type": "object",
+            "description": "A stand-in.",
+            "properties": {
+              "decl": {
+                "$ref": "#/$defs/decl"
+              },
+              "for": {
+                "$ref": "#/$defs/decl",
+                "description": "The declaration it stands in for."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "decl",
+              "for"
+            ]
+          }
+        },
+        "orders": {
+          "type": "array",
+          "description": "Root orders to run in (default forward).",
+          "items": {
+            "enum": [
+              "forward",
+              "reverse"
+            ]
+          },
+          "minItems": 1
+        },
+        "expect": {
+          "type": "array",
+          "description": "Expected diagnostics.",
+          "items": {
+            "type": "object",
+            "description": "An expected diagnostic.",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The diagnostic code.",
+                "minLength": 1
+              },
+              "decl": {
+                "$ref": "#/$defs/decl",
+                "description": "Optional: the declaration it must name."
+              },
+              "severity": {
+                "enum": [
+                  "error",
+                  "warning",
+                  "info"
+                ],
+                "default": "error",
+                "description": "Default error."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "code"
+            ]
+          }
+        },
+        "trace": {
+          "type": "array",
+          "description": "Expected traces.",
+          "items": {
+            "type": "object",
+            "description": "A trace that must contain these constants.",
+            "properties": {
+              "decl": {
+                "$ref": "#/$defs/decl"
+              },
+              "contains": {
+                "type": "array",
+                "description": "Constants the with-proofs trace must contain.",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "decl"
+            ]
+          }
+        },
+        "impact": {
+          "type": "array",
+          "description": "Expected impact results.",
+          "items": {
+            "type": "object",
+            "description": "An impact result that must include these declarations.",
+            "properties": {
+              "decl": {
+                "$ref": "#/$defs/decl"
+              },
+              "includes": {
+                "type": "array",
+                "description": "Declarations it must reach.",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "decl"
+            ]
+          }
+        },
+        "pin_decls": {
+          "type": "array",
+          "description": "Overrides the pinned declarations.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "key": {
+          "type": "array",
+          "description": "Expected key-list entries.",
+          "items": {
+            "type": "object",
+            "description": "A declaration the key list must hold with this tag.",
+            "properties": {
+              "decl": {
+                "$ref": "#/$defs/decl"
+              },
+              "tag": {
+                "type": "string",
+                "description": "Its tag.",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "decl",
+              "tag"
+            ]
+          }
+        },
+        "compare": {
+          "type": "array",
+          "description": "`fpcompare` comparisons.",
+          "items": {
+            "type": "object",
+            "description": "A comparison of two declarations' fingerprints.",
+            "properties": {
+              "a": {
+                "$ref": "#/$defs/decl"
+              },
+              "b": {
+                "$ref": "#/$defs/decl"
+              },
+              "level": {
+                "enum": [
+                  "statement",
+                  "digest"
+                ],
+                "default": "digest",
+                "description": "Which fingerprint (default digest)."
+              },
+              "same": {
+                "type": "boolean",
+                "description": "Whether they must be equal (default false)."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "fault"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "expect"
+            ],
+            "properties": {
+              "expect": {
+                "minItems": 1
+              }
+            }
+          },
+          "description": "A fault (the default kind) needs at least one expect."
+        }
+      ]
+    },
+    "decl": {
+      "type": "string",
+      "description": "An absolute Lean declaration id as `Name.toString` prints it (the ids `tracker graph` uses).",
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,28 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-attestations/0"
+
+[[attestation]]
+id = "2026-11-20-main-baseline"
+kind = "provisional-baseline"
+by = "owner"
+initials = "XY"
+date = "2026-11-20"
+scope = "Provisional approval of this declaration's interface baseline."
+[[attestation.binding]]
+decl = "RKToy.Abstract.main"
+statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"
+digest = "sha256:322f390c10bc6ede56806133b06461ecbefbef4d88ea5eed85ae5ea08bfb49ef"
+evidence = ["fingerprint:RKToy.Abstract.main@decaf64fa662.322f390c10bc"]
+
+[[attestation]]
+id = "2026-12-01-curve-expert"
+kind = "expert-review"
+by = "expert"
+initials = "AB"
+date = "2026-12-01"
+scope = "The curve definition matches the source's definition."
+[[attestation.binding]]
+decl = "RKToy.Abstract.Curve"
+statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"
+digest = ""
+evidence = ["fingerprint:RKToy.Abstract.main@decaf64fa662.322f390c10bc", "readback:RKToy.Abstract.main@decaf64fa662.322f390c10bc:claude:cce8be0103f3"]

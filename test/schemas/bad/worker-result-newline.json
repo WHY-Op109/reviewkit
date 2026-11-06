@@ -1,0 +1,70 @@
+{
+  "format": "reviewkit-worker-result/0",
+  "task_id": "2026-11-20T0300Z-replace-RKToy.Abstract.Curve-1",
+  "model": {
+    "provider": "claude",
+    "model": "claude-example-1",
+    "effort": "max",
+    "cli_version": "9.9.9 (Claude Code)"
+  },
+  "prompt_sha256": "sha256:cce8be0103f3158fb4e567bcc8d416eeb6b90ca343ca0ace0125cd5bad9306e6",
+  "schema_sha256": "sha256:527d44e056dd5c76d06a3ac0ea4c65243bda514d670fd84287e4682a6bab7d49",
+  "usage": {
+    "input_tokens": 1200,
+    "output_tokens": 800,
+    "cache_read_input_tokens": 0,
+    "total_cost_usd": 0.21
+  },
+  "repaired": false,
+  "head_commit": "89abcdef0123456789abcdef0123456789abcdef\n",
+  "output": {
+    "outcome": "partial",
+    "reason": "turn-limit",
+    "summary": "Replaced the placeholder by a definition; two lemmas remain.",
+    "changed_files": [
+      {
+        "path": "RKToy/Abstract.lean",
+        "change": "modified",
+        "previous_path": null
+      }
+    ],
+    "declarations": [
+      {
+        "decl": "RKToy.Abstract.Curve",
+        "action": "replaced-placeholder",
+        "previous_name": null
+      }
+    ],
+    "plan_edits": [
+      {
+        "file": "plans/RKToy/Abstract.toml",
+        "node": "RKToy.Abstract.Curve",
+        "field": "desc",
+        "before": "\"A curve.\"",
+        "after": "\"A smooth projective curve.\""
+      }
+    ],
+    "wrong_marks": [],
+    "suspicions": [
+      {
+        "kind": "vacuity",
+        "decl": "RKToy.Abstract.main",
+        "detail": "The hypothesis is never used."
+      }
+    ],
+    "proposals": [
+      {
+        "path": "reviews/sorry-budget.toml",
+        "text": "remove the helper entry",
+        "rationale": "the helper is proved now"
+      }
+    ],
+    "checks_run": [
+      {
+        "command": "lake build RKToy",
+        "result": "passed",
+        "note": null
+      }
+    ]
+  }
+}

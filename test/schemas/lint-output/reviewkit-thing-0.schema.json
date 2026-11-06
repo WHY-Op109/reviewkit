@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-thing-0.schema.json",
+  "title": "Lint fixture",
+  "description": "A schema with one planted defect.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-thing/0"
+    },
+    "output": {
+      "$ref": "#/$defs/output"
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "output": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "a"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

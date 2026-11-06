@@ -1,0 +1,17 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-sorry-budget/0"
+
+[[entry]]
+decl = "RKToy.Abstract.main"
+statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da\n"
+digest = "sha256:322f390c10bc6ede56806133b06461ecbefbef4d88ea5eed85ae5ea08bfb49ef"
+evidence = "fingerprint:RKToy.Abstract.main@decaf64fa662.322f390c10bc"
+source = "Toy Theorem 1"
+kind = "proof debt"
+approved = "2026-11-20 XY"
+attestation = "2026-11-20-main-baseline"
+
+[[entry]]
+decl = "RKToy.Abstract.helper"
+statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"
+approved = ""

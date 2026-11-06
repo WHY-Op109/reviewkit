@@ -1,0 +1,25 @@
+{
+ "format": "reviewkit-report/0",
+ "command": "closure",
+ "config": "project.toml",
+ "ok": true,
+ "reports": [
+  {
+   "check": "closure",
+   "ok": true,
+   "errors": 0,
+   "warnings": 0,
+   "diagnostics": [],
+   "key_list": [
+    {
+     "decl": "Toy.A.foo",
+     "tag": "abstract"
+    },
+    {
+     "decl": "Toy.B.baz",
+     "tag": "abstract"
+    }
+   ]
+  }
+ ]
+}

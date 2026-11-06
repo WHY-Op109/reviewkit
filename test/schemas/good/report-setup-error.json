@@ -1,0 +1,7 @@
+{
+  "format": "reviewkit-report/0",
+  "command": "lint",
+  "config": "",
+  "ok": false,
+  "setup_error": "lint: schema directory nowhere not found"
+}

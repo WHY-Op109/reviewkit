@@ -1,0 +1,18 @@
+{
+ "version": "1.3.0",
+ "packagesDir": ".lake/packages",
+ "packages": [
+  {
+   "url": "https://github.com/example/corelib",
+   "type": "git",
+   "subDir": null,
+   "scope": "",
+   "rev": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "name": "corelib",
+   "manifestFile": "lake-manifest.json",
+   "inputRev": "main",
+   "inherited": true,
+   "configFile": "lakefile.toml"
+  }
+ ]
+}

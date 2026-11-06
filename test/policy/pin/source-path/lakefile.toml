@@ -1,0 +1,11 @@
+name = "Toy"
+
+# UpstreamLib as a local path dependency: the pin (rev, manifest commit) no longer says what is built.
+[[require]]
+name = "UpstreamLib"
+path = "vendor/upstreamlib"
+rev = "v1.2.0"
+
+[[require]]
+name = "local"
+path = "local"

@@ -1,0 +1,51 @@
+{
+ "format": "reviewkit-snapshot/0",
+ "nodes": {
+  "Toy.A.bar": {
+   "deprecated": false,
+   "planned": true,
+   "state": "stated",
+   "wrong": false
+  },
+  "Toy.A.foo": {
+   "deprecated": false,
+   "planned": true,
+   "state": "proved",
+   "wrong": false
+  },
+  "Toy.A.helper": {
+   "deprecated": false,
+   "planned": false,
+   "state": "proved",
+   "wrong": false
+  },
+  "Toy.B.baz": {
+   "deprecated": false,
+   "planned": true,
+   "state": "open",
+   "wrong": false
+  },
+  "Toy.B.old": {
+   "deprecated": false,
+   "planned": true,
+   "state": "proved",
+   "wrong": false
+  },
+  "Toy.B.qux": {
+   "deprecated": false,
+   "planned": true,
+   "state": "wrong",
+   "wrong": true
+  }
+ },
+ "totals": {
+  "axioms": 0,
+  "deprecated": 0,
+  "nodes": 6,
+  "open": 1,
+  "planned": 5,
+  "proved": 2,
+  "stated": 1,
+  "wrong": 1
+ }
+}

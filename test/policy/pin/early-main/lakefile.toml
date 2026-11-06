@@ -1,0 +1,10 @@
+name = "Toy"
+
+[[require]]
+name = "UpstreamLib"
+git = "https://github.com/example/upstreamlib"
+rev = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+[[require]]
+name = "local"
+path = "local"

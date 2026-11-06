@@ -1,0 +1,14 @@
+# ReviewKit schema test instance (data format v0); toy names only.
+format = "reviewkit-attestations/0"
+
+[[attestation]]
+id = "a2"
+kind = "expert-review"
+by = "owner"
+initials = "XY"
+date = "2026-11-20"
+scope = "reviewed"
+[[attestation.binding]]
+decl = "RKToy.Abstract.main"
+statement = "sha256:decaf64fa6628c5fda75bface4f6e23e43df7fef7909532b2d69a9a020ba86da"
+evidence = ["fingerprint:RKToy.Abstract.main@decaf64fa662.322f390c10bc"]

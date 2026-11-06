@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-readback-0.schema.json",
+  "title": "Blind read-back record",
+  "description": "A blind read-back (K5, D39; tiers 1 and 2), stored as machine evidence. The read-back never sees the source: the harness stages only the declaration's slice into an empty temporary directory and runs the model tool-less. The host wraps the validated `output` (pass `$defs/output` to the CLI) with the provenance only it knows. Freshness covers the input (subject and slice), prompt, schema and model settings (D39).",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-readback/0",
+      "description": "The format identifier, `reviewkit-readback/0`."
+    },
+    "kind": {
+      "const": "readback",
+      "description": "The evidence kind."
+    },
+    "id": {
+      "type": "string",
+      "description": "The evidence id, `readback:<decl>@<s12>.<d12>:<channel>:<p12>` (p12: the first 12 hex digits of prompt_sha256).",
+      "pattern": "^readback:.+@[0-9a-f]{12}\\.[0-9a-f]{12}:(claude|codex):[0-9a-f]{12}$"
+    },
+    "subject": {
+      "$ref": "#/$defs/subject"
+    },
+    "slice_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "sha256 of the staged slice the model read."
+    },
+    "channel": {
+      "$ref": "#/$defs/provider",
+      "description": "The read-back channel: `claude` (tier 1) or `codex` (tier 2)."
+    },
+    "model": {
+      "$ref": "#/$defs/model"
+    },
+    "prompt_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "sha256 of the exact prompt text sent (template filled in)."
+    },
+    "schema_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "sha256 of the output schema passed to the CLI (`$defs/output` of this schema, serialised)."
+    },
+    "usage": {
+      "$ref": "#/$defs/usage"
+    },
+    "repaired": {
+      "type": "boolean",
+      "description": "The one repair turn was used: the first answer failed schema validation."
+    },
+    "output": {
+      "$ref": "#/$defs/output"
+    }
+  },
+  "required": [
+    "format",
+    "kind",
+    "id",
+    "subject",
+    "slice_sha256",
+    "channel",
+    "model",
+    "prompt_sha256",
+    "schema_sha256",
+    "usage",
+    "repaired",
+    "output"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "claude"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "then": {
+        "properties": {
+          "model": {
+            "properties": {
+              "provider": {
+                "const": "claude"
+              }
+            }
+          }
+        }
+      },
+      "description": "The channel is the model's provider."
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "codex"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "then": {
+        "properties": {
+          "model": {
+            "properties": {
+              "provider": {
+                "const": "codex"
+              }
+            }
+          }
+        }
+      },
+      "description": "The channel is the model's provider."
+    }
+  ],
+  "$defs": {
+    "output": {
+      "type": "object",
+      "description": "The blind reading (the model-facing part). The model sees only the staged slice (the declaration and the definitions it depends on, doc comments and source hints stripped), never the source.",
+      "properties": {
+        "informal_statement": {
+          "type": "string",
+          "description": "The declaration's meaning in ordinary mathematical language, as read from the Lean alone."
+        },
+        "objects": {
+          "type": "array",
+          "description": "The objects the statement involves.",
+          "items": {
+            "type": "object",
+            "description": "An object.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name as it appears in the slice."
+              },
+              "meaning": {
+                "type": "string",
+                "description": "What it denotes, as read from its definition."
+              }
+            },
+            "required": [
+              "name",
+              "meaning"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "description": "The hypotheses, in order.",
+          "items": {
+            "type": "object",
+            "description": "A hypothesis.",
+            "properties": {
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The binder or field name, or null if anonymous."
+              },
+              "text": {
+                "type": "string",
+                "description": "What it assumes, in words."
+              }
+            },
+            "required": [
+              "name",
+              "text"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "quantifier_structure": {
+          "type": "string",
+          "description": "The quantifier and binder structure (what is universally or existentially quantified, over what, in which order)."
+        },
+        "placeholders": {
+          "type": "array",
+          "description": "Placeholders seen (opaque or `@[placeholder]` declarations).",
+          "items": {
+            "type": "object",
+            "description": "A placeholder.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Its name."
+              },
+              "role": {
+                "type": "string",
+                "description": "The role it plays in the statement."
+              }
+            },
+            "required": [
+              "name",
+              "role"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "uncertainties": {
+          "type": "array",
+          "description": "What the reader could not determine, or read with doubt.",
+          "items": {
+            "type": "string",
+            "description": "One uncertainty."
+          }
+        }
+      },
+      "required": [
+        "informal_statement",
+        "objects",
+        "hypotheses",
+        "quantifier_structure",
+        "placeholders",
+        "uncertainties"
+      ],
+      "additionalProperties": false
+    },
+    "decl": {
+      "type": "string",
+      "description": "An absolute Lean declaration id as `Name.toString` prints it (the ids `tracker graph` uses).",
+      "minLength": 1
+    },
+    "fingerprintId": {
+      "type": "string",
+      "description": "Evidence id of a fingerprint record: `fingerprint:<decl>@<s12>.<d12>`, the first 12 hex digits of the statement fingerprint and of the digest.",
+      "pattern": "^fingerprint:.+@[0-9a-f]{12}\\.[0-9a-f]{12}$"
+    },
+    "model": {
+      "type": "object",
+      "description": "The model call, as the host ran it (never written by the model).",
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/provider"
+        },
+        "model": {
+          "type": "string",
+          "description": "The model id the CLI reported (resolved, not an alias).",
+          "minLength": 1
+        },
+        "effort": {
+          "type": "string",
+          "description": "The reasoning effort passed to the CLI, in its own vocabulary (for example `max`, `xhigh`, `high`).",
+          "minLength": 1
+        },
+        "cli_version": {
+          "type": "string",
+          "description": "The CLI's version string (`claude --version`, `codex --version`).",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model",
+        "effort",
+        "cli_version"
+      ]
+    },
+    "provider": {
+      "enum": [
+        "claude",
+        "codex"
+      ],
+      "description": "The model CLI: `claude` (Claude Code, `claude -p`) or `codex` (`codex exec`)."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "A SHA-256 hash: `sha256:` followed by 64 lowercase hex digits.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "subject": {
+      "type": "object",
+      "description": "The declaration reviewed, bound to its fingerprints and its fingerprint record.",
+      "properties": {
+        "decl": {
+          "$ref": "#/$defs/decl"
+        },
+        "statement": {
+          "$ref": "#/$defs/sha256",
+          "description": "The statement fingerprint at review time."
+        },
+        "digest": {
+          "$ref": "#/$defs/sha256",
+          "description": "The transitive digest at review time."
+        },
+        "evidence": {
+          "$ref": "#/$defs/fingerprintId",
+          "description": "The fingerprint record that holds both."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decl",
+        "statement",
+        "digest",
+        "evidence"
+      ]
+    },
+    "usage": {
+      "type": "object",
+      "description": "Token and cost usage as the CLI reported it, kept verbatim (deliberately open: each CLI has its own fields).",
+      "additionalProperties": true
+    }
+  }
+}

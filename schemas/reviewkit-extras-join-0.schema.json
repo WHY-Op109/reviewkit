@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reviewkit.invalid/schemas/reviewkit-extras-join-0.schema.json",
+  "title": "Cards: tracker graph joined with extras",
+  "description": "Written by `rk_extras.py --out`: one card per planned node and per node with an extras entry, holding the graph node's fields and the entry's fields (the site's input, K11).",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "reviewkit-extras-join/0",
+      "description": "The format identifier, `reviewkit-extras-join/0`."
+    },
+    "cards": {
+      "type": "array",
+      "description": "The cards.",
+      "items": {
+        "$ref": "#/$defs/card"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "cards"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "card": {
+      "type": "object",
+      "description": "One card.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/decl",
+          "description": "The node's declaration id."
+        },
+        "module": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The node's module, or null if the graph names none."
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "definition",
+                "theorem",
+                "axiom"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The declaration kind as tracker reports it, or null for an open node."
+        },
+        "state": {
+          "enum": [
+            "open",
+            "stated",
+            "proved",
+            "axioms",
+            "wrong"
+          ],
+          "description": "Tracker's state (`wrong` overrides)."
+        },
+        "planned": {
+          "type": "boolean",
+          "description": "The node is in the plan."
+        },
+        "desc": {
+          "type": "string",
+          "description": "The natural-language statement (doc comment or plan `desc`)."
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The plan's source locator, or null."
+        },
+        "deps": {
+          "type": "array",
+          "description": "Dependency ids.",
+          "items": {
+            "$ref": "#/$defs/decl"
+          }
+        },
+        "wrong": {
+          "type": "string",
+          "description": "Why the statement is wrong (tracker `wrong`)."
+        },
+        "deprecated": {
+          "type": "string",
+          "description": "Why the node is deprecated, and what to use."
+        },
+        "provider": {
+          "type": "string",
+          "description": "Extras: the provider.",
+          "minLength": 1
+        },
+        "key": {
+          "type": "boolean",
+          "description": "Extras: a key definition."
+        },
+        "chain": {
+          "type": "boolean",
+          "description": "Extras: a chain member."
+        },
+        "upstream": {
+          "type": "string",
+          "description": "Extras: the re-exported provider declaration.",
+          "minLength": 1
+        },
+        "blueprint": {
+          "type": "string",
+          "description": "Extras: the blueprint node.",
+          "minLength": 1
+        },
+        "hypotheses": {
+          "type": "array",
+          "description": "Extras: hypotheses.",
+          "items": {
+            "type": "string",
+            "description": "A hypothesis.",
+            "minLength": 1
+          }
+        },
+        "note": {
+          "type": "string",
+          "description": "Extras: a note."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "module",
+        "kind",
+        "state",
+        "planned",
+        "desc",
+        "source",
+        "deps"
+      ]
+    },
+    "decl": {
+      "type": "string",
+      "description": "An absolute Lean declaration id as `Name.toString` prints it (the ids `tracker graph` uses).",
+      "minLength": 1
+    }
+  }
+}

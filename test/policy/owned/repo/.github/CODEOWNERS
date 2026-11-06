@@ -1,0 +1,7 @@
+# toy CODEOWNERS: the catch-all comes first, later lines win
+*              @someone-else
+/.github/      @toy-owner
+/POLICY.md     @toy-owner   # inline comment
+/kit/          @helper @toy-owner
+/build.toml    @Toy-Owner
+/vendor/sub    @toy-owner

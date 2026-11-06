@@ -1,0 +1,65 @@
+{
+  "format": "reviewkit-scout-digest/0",
+  "date": "2026-11-20",
+  "mode": "weekly",
+  "sources_checked": [
+    {
+      "source": "RKUp",
+      "ref": "0123456789abcdef0123456789abcdef01234567",
+      "ok": true,
+      "error": null
+    },
+    {
+      "source": "arxiv",
+      "ref": null,
+      "ok": false,
+      "error": "timeout"
+    }
+  ],
+  "hits": [
+    {
+      "source": "RKUp",
+      "kind": "new-declaration",
+      "ref": "89abcdef0123456789abcdef0123456789abcdef",
+      "url": null,
+      "summary": "RKUp now defines Curve.",
+      "watched_path": "RKUp/Curve",
+      "affected_decls": [
+        "RKToy.Abstract.Curve"
+      ],
+      "triage": "needs-owner"
+    }
+  ],
+  "searches": [
+    {
+      "model": {
+        "provider": "codex",
+        "model": "gpt-example-1",
+        "effort": "xhigh",
+        "cli_version": "codex-cli 9.9.9"
+      },
+      "prompt_sha256": "sha256:cce8be0103f3158fb4e567bcc8d416eeb6b90ca343ca0ace0125cd5bad9306e6",
+      "schema_sha256": "sha256:527d44e056dd5c76d06a3ac0ea4c65243bda514d670fd84287e4682a6bab7d49",
+      "usage": {},
+      "repaired": false,
+      "output": {
+        "hits": [
+          {
+            "source": "RKUp",
+            "kind": "new-declaration",
+            "ref": "89abcdef0123456789abcdef0123456789abcdef",
+            "url": null,
+            "summary": "RKUp now defines Curve.",
+            "watched_path": "RKUp/Curve",
+            "affected_decls": [
+              "RKToy.Abstract.Curve"
+            ],
+            "triage": "needs-owner"
+          }
+        ],
+        "notes": ""
+      }
+    }
+  ],
+  "resets_reviews": false
+}

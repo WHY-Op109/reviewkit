@@ -1,0 +1,40 @@
+{
+  "format": "reviewkit-snapshot/0",
+  "commit": "0123456789abcdef0123456789abcdef01234567",
+  "nodes": {
+    "RKToy.Abstract.main": {
+      "state": "stated",
+      "planned": true,
+      "wrong": false,
+      "deprecated": false
+    },
+    "RKToy.Abstract.Curve": {
+      "state": "proved",
+      "planned": true,
+      "wrong": false,
+      "deprecated": true
+    },
+    "RKToy.Abstract.Later": {
+      "state": "wrong",
+      "planned": true,
+      "wrong": true,
+      "deprecated": false
+    },
+    "RKToy.Abstract.aux": {
+      "state": "proved",
+      "planned": false,
+      "wrong": false,
+      "deprecated": false
+    }
+  },
+  "totals": {
+    "nodes": 4,
+    "planned": 3,
+    "open": 0,
+    "stated": 1,
+    "axioms": 0,
+    "proved": 1,
+    "wrong": 1,
+    "deprecated": 1
+  }
+}
