@@ -1,0 +1,26 @@
+{"statement":
+ {"text":
+  "T 0 (Pd (C Nat ) (A (A (C Exists (s 0)) (C Nat )) (Ld (C Nat ) (A (A (A (A (C LT.lt 0) (C Nat )) (C instLTNat )) #1) #0))))",
+  "fingerprint":
+  "sha256:f1504f2f7c2f2ed86098229016fb29daaa3f0e8d220b601ded404bd02a9f975d"},
+ "serialisation": "reviewkit-canonical/0",
+ "producer":
+ {"tool": "reviewkit",
+  "lean_version": "4.36.0-rc2",
+  "kit_version": "0.2.0",
+  "config_sha256":
+  "sha256:fa0ff09c97ad58c2c74c644e375548267ac8df3046b1f313fab4ee36bf9a197a",
+  "config": "test/project.toml"},
+ "module": "RKToy.Abstract",
+ "kind": "fingerprint",
+ "id": "fingerprint:RKToy.Abstract.exists_bound@f1504f2f7c2f.1ee38edd8288",
+ "format": "reviewkit-evidence/0",
+ "digest":
+ {"text":
+  "[T 0 (Pd (C Nat:50bdba2d5863881f ) (A (A (C Exists:9e7fcd7e3d2af75b (s 0)) (C Nat:50bdba2d5863881f )) (Ld (C Nat:50bdba2d5863881f ) (A (A (A (A (C LT.lt:5a221c36bfbe29d5 0) (C Nat:50bdba2d5863881f )) (C instLTNat:f529d2ce59dc7cbe )) #1) #0))))]",
+  "fingerprint":
+  "sha256:1ee38edd82880af57fe073ce785a2bc3d5bd56544538aa244ccef9e23813ec2c",
+  "block_size": 1,
+  "block_index": 0},
+ "decl_kind": "theorem",
+ "decl": "RKToy.Abstract.exists_bound"}

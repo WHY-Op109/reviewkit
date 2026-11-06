@@ -4,3 +4,4 @@ import ReviewKit.Config
 import ReviewKit.Core
 import ReviewKit.Fingerprint
 import ReviewKit.Checks
+import ReviewKit.Evidence

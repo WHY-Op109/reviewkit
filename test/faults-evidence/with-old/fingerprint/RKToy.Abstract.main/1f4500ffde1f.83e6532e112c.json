@@ -1,0 +1,26 @@
+{
+ "statement": {
+  "text": "T 0 (C RKToy.Abstract.Statement )",
+  "fingerprint": "sha256:1f4500ffde1f9b5afc65b9b3729dc89d44b0d7a7c85bdddf687bae62783e8bf6"
+ },
+ "serialisation": "reviewkit-canonical/0",
+ "producer": {
+  "tool": "reviewkit",
+  "lean_version": "4.36.0-rc2",
+  "kit_version": "0.2.0",
+  "config_sha256": "sha256:fa0ff09c97ad58c2c74c644e375548267ac8df3046b1f313fab4ee36bf9a197a",
+  "config": "test/project.toml"
+ },
+ "module": "RKToy.Abstract",
+ "kind": "fingerprint",
+ "id": "fingerprint:RKToy.Abstract.main@1f4500ffde1f.83e6532e112c",
+ "format": "reviewkit-evidence/0",
+ "digest": {
+  "text": "[an older digest text: fixture]",
+  "fingerprint": "sha256:83e6532e112ca4e69844807d061811e027f33bb39b0342b2d7333cfbfd7d0834",
+  "block_size": 1,
+  "block_index": 0
+ },
+ "decl_kind": "theorem",
+ "decl": "RKToy.Abstract.main"
+}

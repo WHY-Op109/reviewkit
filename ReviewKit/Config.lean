@@ -70,6 +70,10 @@ structure Config where
   pinDecls : Array Name := #[]
   /-- Module prefixes whose placeholders must be tagged `@[placeholder]`. -/
   placeholderModules : Array Name := #[]
+  /-- Machine evidence records (`evidence.dir`, D43/F11), relative to the working directory. -/
+  evidenceDir : Option System.FilePath := none
+  /-- Human attestation records (`attestations.file`, D43/F11). -/
+  attestationsFile : Option System.FilePath := none
   /-- Fault fixtures only. -/
   standIns : Array StandIn := #[]
   /-- Fault fixtures only: compute per-declaration traces with the roots in reverse order. -/
@@ -148,13 +152,15 @@ def loadTomlFile (path : System.FilePath) : IO (Except String Table) := do
       return s!"{m.pos.line}:{m.pos.column}: {← m.data.toString}"
     return .error s!"{path}: {String.intercalate "; " msgs}"
 
-/-- Top-level tables that hold data read by later kit tools (papers manifest, scout, upstream
-pin policy); accepted here without validation. -/
-def reservedTables : List String := ["papers", "scout", "upstream"]
+/-- Top-level tables that hold data read by other kit tools (papers manifest, scout, upstream
+pin, and the tables the Python checks in `scripts/` read); accepted here without validation:
+their JSON Schema (`schemas/reviewkit-config-0.schema.json`) checks them. -/
+def reservedTables : List String :=
+  ["papers", "scout", "upstream", "extras", "tracker", "owned", "flagged", "pin_policy"]
 
 def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
   checkKeys t (["format", "project", "closure", "axioms", "imports", "foundations_names",
-    "fingerprint", "pin", "placeholders"] ++ reservedTables) "config"
+    "fingerprint", "pin", "placeholders", "evidence", "attestations"] ++ reservedTables) "config"
   match ← getStr t `format "config" with
   | some "reviewkit-config/0" => pure ()
   | some f => cfgErr s!"config.format: unsupported format '{f}' (expected reviewkit-config/0)"
@@ -186,6 +192,10 @@ def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
   checkKeys pin ["file", "decls"] "pin"
   let ph ← getTable t `placeholders "config"
   checkKeys ph ["modules"] "placeholders"
+  let ev ← getTable t `evidence "config"
+  checkKeys ev ["dir"] "evidence"
+  let att ← getTable t `attestations "config"
+  checkKeys att ["file"] "attestations"
   let allowed ← getNames a `allowed "axioms"
   let notations ← getNames fp `notations "fingerprint"
   return {
@@ -208,6 +218,8 @@ def decodeConfig (path : System.FilePath) (t : Table) : CfgM Config := do
     pinFile := (← getStr pin `file "pin").map (·)
     pinDecls := ← getNames pin `decls "pin"
     placeholderModules := ← getNames ph `modules "placeholders"
+    evidenceDir := (← getStr ev `dir "evidence").map (·)
+    attestationsFile := (← getStr att `file "attestations").map (·)
   }
 
 def loadConfig (path : System.FilePath) : IO (Except String Config) := do

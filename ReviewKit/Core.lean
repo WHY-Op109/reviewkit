@@ -130,12 +130,16 @@ def usedConsts (e : Expr) : Array Name := Id.run do
 
 /-- Dependencies of a declaration. Statement level (`proofs = false`): its type, the value of a
 definition, and the constructors of an inductive type (so a structure's field types are seen,
-L3 report §1). With proofs: theorem proofs too. Opaque witnesses are never followed: they carry
-no meaning. -/
+L3 report §1). With proofs: theorem proofs and **opaque values** too. An opaque value carries no
+meaning (the kernel never unfolds it), so the statement-level walk and the fingerprints skip it;
+but it can hide an admission (`opaque x : Nat := sorry` depends on `sorryAx`, as `#print axioms`
+shows), so the axiom audit's trace, which uses `proofs = true`, follows it (D44, Codex's A1
+review). -/
 def depsOf (info : ConstantInfo) (proofs : Bool) : Array Name :=
   let t := usedConsts info.type
   let v := match info with
     | .thmInfo val => if proofs then usedConsts val.value else #[]
+    | .opaqueInfo val => if proofs then usedConsts val.value else #[]
     | .defnInfo val => usedConsts val.value
     | _ => #[]
   let c := match info with
@@ -188,11 +192,14 @@ partial def ownerOf (env : Environment) (n : Name) : Name :=
     | .anonymous => n
   else n
 
+/-- Whether a declaration uses `sorryAx` itself: in its type, a definition's or theorem's value,
+or an opaque's value (an admission hidden in an opaque body is a sorry source, D44). -/
 def directSorry (info : ConstantInfo) : Bool :=
   (usedConsts info.type).contains ``sorryAx ||
     (match info with
       | .thmInfo v => (usedConsts v.value).contains ``sorryAx
       | .defnInfo v => (usedConsts v.value).contains ``sorryAx
+      | .opaqueInfo v => (usedConsts v.value).contains ``sorryAx
       | _ => false)
 
 /-- Placeholder kind of one declaration, if any. -/

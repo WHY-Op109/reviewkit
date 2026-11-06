@@ -252,3 +252,144 @@ a = "RKUp.V1.f"
 b = "RKUp.V2.f"
 level = "digest"
 same = false                      # provider body changed, same type (D40 Finding 2)
+
+# --- opaque bodies (D44, Codex's review of A1) ------------------------------------------------
+
+[[case]]
+name = "axioms: an admission hidden in an opaque body is a sorry source"
+modules = ["RKToy.Bad.OpaqueSorry"]
+command = "axioms"
+abstract = "RKToy.Bad.OpaqueSorry"
+[[case.expect]]
+code = "sorry-not-in-budget"
+decl = "RKToy.Bad.OpaqueSorry.hidden"
+[[case.trace]]
+decl = "RKToy.Bad.OpaqueSorry.usesHidden"
+contains = ["sorryAx"]
+
+[[case]]
+name = "axioms: an honest opaque witness passes (control for the opaque fault)"
+kind = "control"
+modules = ["RKToy.Bad.OpaqueWitness"]
+command = "axioms"
+abstract = "RKToy.Bad.OpaqueWitness"
+
+[[case]]
+name = "placeholders: an opaque whose witness is sorry (warning)"
+modules = ["RKToy.Bad.OpaqueSorry"]
+command = "placeholders"
+[[case.expect]]
+code = "placeholder-sorry-witness"
+decl = "RKToy.Bad.OpaqueSorry.hidden"
+severity = "warning"
+
+# --- evidence records and attestations (D9, D43/F11; data format v0) --------------------------
+# The clean control above runs `all`, which includes `evidence` (the budget's and pin's links)
+# and `attestations` (test/reviews/attestations.toml, computed as current).
+
+[[case]]
+name = "evidence: a record whose digest text was edited"
+command = "evidence"
+evidence = "test/faults-evidence/tampered"
+budget = "test/faults-evidence/../reviews/sorry-budget.toml"
+pin = "test/faults-evidence/../reviews/statement-pin.toml"
+[[case.expect]]
+code = "evidence-hash-mismatch"
+decl = "RKToy.Abstract.main"
+[[case.expect]]
+code = "budget-evidence-missing"
+decl = "RKToy.Abstract.exists_bound"
+[[case.expect]]
+code = "pin-evidence-missing"
+decl = "RKToy.Abstract.Curve"
+
+[[case]]
+name = "evidence: a record stored under another declaration's path"
+command = "evidence"
+evidence = "test/faults-evidence/misplaced"
+budget = "test/faults-evidence/../reviews/sorry-budget.toml"
+pin = "test/faults-evidence/../reviews/statement-pin.toml"
+[[case.expect]]
+code = "evidence-id-mismatch"
+decl = "RKToy.Abstract.main"
+[[case.expect]]
+code = "budget-evidence-missing"
+[[case.expect]]
+code = "pin-evidence-missing"
+
+[[case]]
+name = "evidence: a budget entry names evidence of another statement"
+command = "evidence"
+budget = "test/faults-evidence/budget-evidence-mismatch.toml"
+evidence = "test/faults-evidence/with-old"
+pin = "test/faults-evidence/../reviews/statement-pin.toml"
+[[case.expect]]
+code = "budget-evidence-mismatch"
+decl = "RKToy.Abstract.main"
+[[case.expect]]
+code = "budget-evidence-missing"
+decl = "RKToy.Abstract.exists_bound"
+[[case.expect]]
+code = "pin-evidence-missing"
+decl = "RKToy.Abstract.Curve"
+
+[[case]]
+name = "evidence: a pin entry names an attestation that does not exist"
+command = "evidence"
+pin = "test/faults-evidence/pin-attestation-unknown.toml"
+[[case.expect]]
+code = "pin-attestation-unknown"
+decl = "RKToy.Abstract.main"
+
+[[case]]
+name = "attestations: statement changed since the attestation (stale, warning)"
+command = "attestations"
+evidence = "test/faults-evidence/with-old"
+attestations = "test/faults-evidence/attest-stale.toml"
+[[case.expect]]
+code = "attestation-stale-statement"
+decl = "RKToy.Abstract.main"
+severity = "warning"
+
+[[case]]
+name = "attestations: a definition used changed since the attestation (stale digest, warning)"
+command = "attestations"
+evidence = "test/faults-evidence/with-old"
+attestations = "test/faults-evidence/attest-stale-digest.toml"
+[[case.expect]]
+code = "attestation-stale-digest"
+decl = "RKToy.Abstract.main"
+severity = "warning"
+
+[[case]]
+name = "attestations: a binding names evidence that does not exist"
+command = "attestations"
+evidence = "test/faults-evidence/with-old"
+attestations = "test/faults-evidence/attest-missing.toml"
+[[case.expect]]
+code = "attestation-evidence-missing"
+decl = "RKToy.Abstract.main"
+
+[[case]]
+name = "attestations: a binding disagrees with the evidence it names"
+command = "attestations"
+evidence = "test/faults-evidence/with-old"
+attestations = "test/faults-evidence/attest-mismatch.toml"
+[[case.expect]]
+code = "attestation-evidence-mismatch"
+decl = "RKToy.Abstract.main"
+
+[[case]]
+name = "attestations: one id used twice"
+command = "attestations"
+evidence = "test/faults-evidence/with-old"
+attestations = "test/faults-evidence/attest-dup.toml"
+[[case.expect]]
+code = "attestation-duplicate-id"
+
+[[case]]
+name = "attestations: an unknown kind is a format error"
+command = "attestations"
+attestations = "test/faults-evidence/attest-bad-kind.toml"
+[[case.expect]]
+code = "attestation-format"

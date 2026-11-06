@@ -50,3 +50,9 @@ decls = ["RKToy.Abstract.main", "RKToy.Abstract.Curve"]
 
 [placeholders]
 modules = ["RKToy"]
+
+[evidence]
+dir = "test/evidence"
+
+[attestations]
+file = "test/reviews/attestations.toml"

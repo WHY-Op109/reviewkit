@@ -218,4 +218,41 @@ def Fingerprinter.digest (fp : Fingerprinter) (n : Name) : String × Fingerprint
 def Fingerprinter.text (fp : Fingerprinter) (n : Name) : String × Fingerprinter :=
   fp.run false (statementText n)
 
+/-- The digest-level canonical text of a declaration's block, the declaration's position in the
+block and the block's size. The digest is `sha256(text)` for a block of one, else
+`sha256("M " ++ position ++ " " ++ sha256(text))` (`digestOf`); `review evidence` recomputes it
+from a stored record. -/
+def Fingerprinter.digestText (fp : Fingerprinter) (n : Name) : (String × Nat × Nat) × Fingerprinter :=
+  fp.run true (do
+    let ctx ← read
+    let members := blockOf ctx.env n
+    let idx := (members.idxOf? n).getD 0
+    let t ← serBlock members[0]!
+    return (t, idx, members.size))
+
+/-! ## Evidence ids (data format v0, `FORMATS.md`) -/
+
+/-- The first 12 hex digits of a `sha256:` fingerprint. -/
+def hex12 (fp : String) : String := ((fp.drop 7).take 12).toString
+
+/-- The id of the fingerprint evidence record of a declaration at the given fingerprints. -/
+def evidenceId (decl : Name) (statement digest : String) : String :=
+  s!"fingerprint:{decl}@{hex12 statement}.{hex12 digest}"
+
+/-- A declaration id as one path component: characters outside `[A-Za-z0-9._-]` become
+`_xHHHH_` (the code point in at least four hex digits). -/
+def declPathComponent (n : Name) : String := Id.run do
+  let mut out := ""
+  for c in n.toString.toList do
+    if c.isAlphanum && c.toNat < 128 || c == '.' || c == '_' || c == '-' then
+      out := out.push c
+    else
+      let h := String.ofList (Nat.toDigits 16 c.toNat)
+      out := out ++ "_x" ++ String.ofList (List.replicate (4 - min 4 h.length) '0') ++ h ++ "_"
+  out
+
+/-- Where a fingerprint record is stored, relative to the evidence directory. -/
+def evidenceRelPath (decl : Name) (statement digest : String) : System.FilePath :=
+  "fingerprint" / declPathComponent decl / s!"{hex12 statement}.{hex12 digest}.json"
+
 end ReviewKit

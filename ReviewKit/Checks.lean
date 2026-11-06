@@ -97,30 +97,47 @@ partial def axiomsOf (env : Environment) (proofs : Bool) (n : Name) : StateM AxS
   modify fun s => { s with inProgress := s.inProgress.erase rep, memo := s.memo.insert rep acc }
   return acc
 
-/-- One budget or pin entry. -/
+/-- One budget or pin entry (`reviewkit-sorry-budget/0`, `reviewkit-statement-pin/0`). -/
 structure FpEntry where
   decl : Name
   statement : String
   digest : String
+  /-- The id of the fingerprint evidence record the entry was generated from (optional). -/
+  evidence : String := ""
+  /-- The id of the owner attestation that holds the approval's scope wording (optional). -/
+  attestation : String := ""
   deriving Inhabited
 
-/-- Read `[[key]]` entries with `decl`, `statement`, `digest` from a TOML file. -/
+/-- The keys a budget entry (`entry`) or a pin entry (`pin`) may have. `approved` is the owner's
+"YYYY-MM-DD <initials>"; the kit checks only that it is a string and never reads it (D44). -/
+def fpEntryKeys (key : Name) : List String :=
+  ["decl", "statement", "digest", "evidence", "approved", "attestation"] ++
+    (if key == `entry then ["source", "kind"] else [])
+
+/-- Read `[[key]]` entries from a budget or pin file. Unknown keys are errors (data format v0). -/
 def loadFpEntries (path : System.FilePath) (key : Name) (format : String) :
     IO (Except String (Array FpEntry)) := do
   match ← loadTomlFile path with
   | .error e => return .error e
   | .ok t =>
     let (entries, errs) := (do
+      checkKeys t ["format", key.toString] path.toString
       match ← getStr t `format path.toString with
       | some f => if f != format then cfgErr s!"{path}: format '{f}', expected {format}"
       | none => cfgErr s!"{path}: missing format"
       let mut out := #[]
       for e in ← getTables t key path.toString do
-        let d := ((← getStr e `decl s!"{path}.{key}").getD "").toName
-        let s := (← getStr e `statement s!"{path}.{key}").getD ""
-        let g := (← getStr e `digest s!"{path}.{key}").getD ""
+        let ctx := s!"{path}.{key}"
+        checkKeys e (fpEntryKeys key) ctx
+        let d := ((← getStr e `decl ctx).getD "").toName
+        let s := (← getStr e `statement ctx).getD ""
+        let g := (← getStr e `digest ctx).getD ""
+        let ev := (← getStr e `evidence ctx).getD ""
+        let att := (← getStr e `attestation ctx).getD ""
+        let _ ← getStr e `approved ctx
+        for k in [`source, `kind] do let _ ← getStr e k ctx
         if d.isAnonymous || s.isEmpty then cfgErr s!"{path}: an entry lacks decl or statement"
-        out := out.push { decl := d, statement := s, digest := g }
+        out := out.push { decl := d, statement := s, digest := g, evidence := ev, attestation := att }
       return out : CfgM (Array FpEntry)).run #[]
     if errs.isEmpty then return .ok entries else return .error (String.intercalate "; " errs.toList)
 
@@ -257,7 +274,8 @@ def suggestBudget (cfg : Config) (env : Environment) (fp : Fingerprinter) : Stri
     let (stmt, fp1) := fp.statement s
     let (dig, fp2) := fp1.digest s
     fp := fp2
-    out := out ++ s!"[[entry]]\ndecl = \"{s}\"\nstatement = \"{stmt}\"\ndigest = \"{dig}\"\n\n"
+    out := out ++ s!"[[entry]]\ndecl = \"{s}\"\nstatement = \"{stmt}\"\ndigest = \"{dig}\"\n" ++
+      s!"evidence = \"{evidenceId s stmt dig}\"\n\n"
   out
 
 /-! ## (c) Placeholders: the census (K2) -/
@@ -283,6 +301,9 @@ def runPlaceholders (cfg : Config) (env : Environment) : Report := Id.run do
     let isTagged := tagged.contains n
     if k == "sorry-valued def" then
       diags := diags.push { check := "placeholders", code := "placeholder-sorry-valued", decl := n, severity := .warning, message := s!"{n} is sorry-valued; use the opaque NonemptyType pattern" }
+    if let some (.opaqueInfo v) := env.find? n then
+      if (usedConsts v.value).contains ``sorryAx then
+        diags := diags.push { check := "placeholders", code := "placeholder-sorry-witness", decl := n, severity := .warning, message := s!"{n} is an opaque whose witness is sorry; the axiom audit counts it as a sorry source (use the NonemptyType pattern or a real witness)" }
     if !isTagged && !covered.contains n then
       diags := diags.push { check := "placeholders", code := "placeholder-untagged", decl := n, modName := moduleOf? env n, message := s!"{n} ({k}) is a placeholder without @[placeholder] and is not the carrier of a tagged one" }
     let kind := if isTagged then "@[placeholder]" else if covered.contains n then s!"{k} (carrier)" else k
@@ -370,7 +391,8 @@ def suggestPins (cfg : Config) (fp : Fingerprinter) : String := Id.run do
     let (stmt, fp1) := fp.statement p
     let (dig, fp2) := fp1.digest p
     fp := fp2
-    out := out ++ s!"[[pin]]\ndecl = \"{p}\"\nstatement = \"{stmt}\"\ndigest = \"{dig}\"\n\n"
+    out := out ++ s!"[[pin]]\ndecl = \"{p}\"\nstatement = \"{stmt}\"\ndigest = \"{dig}\"\n" ++
+      s!"evidence = \"{evidenceId p stmt dig}\"\n\n"
   out
 
 /-! ## (f) Impact: reverse dependencies, proofs included (brainstorm §7.3) -/

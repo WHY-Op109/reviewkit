@@ -1,0 +1,13 @@
+format = "reviewkit-attestations/0"
+# ReviewKit toy fault fixture: an evidence id that names no record.
+[[attestation]]
+id = "toy-missing"
+kind = "owner-check"
+by = "owner"
+initials = "TT"
+date = "2026-11-06"
+scope = "Fixture only."
+[[attestation.binding]]
+decl = "RKToy.Abstract.main"
+statement = "sha256:1f4500ffde1f9b5afc65b9b3729dc89d44b0d7a7c85bdddf687bae62783e8bf6"
+evidence = ["fingerprint:RKToy.Abstract.main@000000000000.000000000000"]

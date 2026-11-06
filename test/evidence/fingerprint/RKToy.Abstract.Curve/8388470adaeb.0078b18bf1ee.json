@@ -1,0 +1,26 @@
+{"statement":
+ {"text":
+  "[I 0 0 0 (S (s 0)) | K 0 0 0 2 (Pd (C RKToy.Foundations.Thing ) (Pd (C Nat ) (C ^0 )))]",
+  "fingerprint":
+  "sha256:8388470adaeb8ae4e15818bc19989bd1709b56a5431ee5b951b724740c0d6466"},
+ "serialisation": "reviewkit-canonical/0",
+ "producer":
+ {"tool": "reviewkit",
+  "lean_version": "4.36.0-rc2",
+  "kit_version": "0.2.0",
+  "config_sha256":
+  "sha256:fa0ff09c97ad58c2c74c644e375548267ac8df3046b1f313fab4ee36bf9a197a",
+  "config": "test/project.toml"},
+ "module": "RKToy.Abstract",
+ "kind": "fingerprint",
+ "id": "fingerprint:RKToy.Abstract.Curve@8388470adaeb.0078b18bf1ee",
+ "format": "reviewkit-evidence/0",
+ "digest":
+ {"text":
+  "[I 0 0 0 (S (s 0)) | K 0 0 0 2 (Pd (C RKUp.Thing#sha256:7708e9d1d007341f101790aebb054699539050e346eee2b47c9c34d67e01a5a1 ) (Pd (C Nat:50bdba2d5863881f ) (C ^0 )))]",
+  "fingerprint":
+  "sha256:0078b18bf1eef73a4565ae7ba3aa9826db8c65e71bfc29ef261318adf1902b08",
+  "block_size": 2,
+  "block_index": 0},
+ "decl_kind": "inductive",
+ "decl": "RKToy.Abstract.Curve"}
